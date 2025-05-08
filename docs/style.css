@@ -81,6 +81,7 @@ header h2 {
   background: var(--btn-bg);
   transition: .15s;
 }
+
 .controls button:hover:not(:disabled), #generateBtn:hover {
   background: rgba(0,0,0,0.05);
   color: var(--btn-txt);;
@@ -438,4 +439,29 @@ select:disabled {
 @keyframes fastFill {
   from { stroke-dashoffset: 0 ; }
   to   { stroke-dashoffset: 1800; }
+}
+
+#volumeControl {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+}
+
+#volumeIcon {
+  font-size: 1.2rem;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--btn-txt);
+  transition: color .15s;
+  width: 2rem;
+}
+
+#volumeIcon.muted {
+  color: #999; /* dim the icon when muted */
+}
+
+#volumeControl input[type="range"] {
+  width: 6rem;
+  vertical-align: middle;
 }

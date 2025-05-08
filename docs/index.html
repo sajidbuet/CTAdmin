@@ -97,7 +97,9 @@
       <button id="toggleTimerBtn" style="float:right;margin-top:4px">Hide Timer</button>
 
     
-    <button id="muteBtn">🔊 Mute</button>
+    
+
+
     <button id="fsToggle" style="float:right;margin-top:4px" aria-label="Toggle Fullscreen">⛶ Fullscreen</button>
     <button id="themeToggle">🌙 Dark Mode</button>
     <button id="toggleSizeBtn"  style="float:right;margin-top:4px;margin-right:.5rem">
@@ -106,6 +108,8 @@
     <!-- new slider wrapper -->
 <div id="scaleControl">
   <label for="scaleSlider"></label>
+  <span id="scaleValue">1.0×</span>
+  
   <input
     type="range"
     id="scaleSlider"
@@ -114,12 +118,27 @@
     step="0.1"
     value="1.0"
   >
-  <span id="scaleValue">1.0×</span>
-  <label for="precountToggle" style="display:flex; align-items:center; gap:0.3rem;">
-    <input type="checkbox" id="precountToggle">
-    Pre-Countdown
-  </label>
+  
 </div>
+<div id="volumeControl" style="display:flex; align-items:center; gap:0.3rem;">
+  <!-- Clickable icon toggles mute -->
+  <button id="volumeIcon" aria-label="Mute/Unmute">
+    🔉
+  </button>
+  <input
+    type="range"
+    id="volumeSlider"
+    min="0"
+    max="1"
+    step="0.01"
+    value="1"
+    title="Audio Volume"
+  >
+</div>  
+<label for="precountToggle" style="display:flex; align-items:center; gap:0.3rem;">
+  <input type="checkbox" id="precountToggle">
+  Pre-Countdown
+</label>
     
     
   </div>

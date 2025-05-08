@@ -5,21 +5,82 @@ const endBell = document.getElementById('endBell');
 const fiveMinBell = document.getElementById('fiveMinBell'); //fiveMinBell  lastFive
 const lastFive    = document.getElementById('lastFive');
 const pleaseStop = document.getElementById('pleaseStop');
-const muteBtn   = document.getElementById('muteBtn');
+//const muteBtn   = document.getElementById('muteBtn');
 const precountToggle   = document.getElementById('precountToggle');
 const precountOverlay  = document.getElementById('precountOverlay');
 
 let isMuted = false;
 let fiveMinFired = false;
 // মিউট বাটন ক্লিক হ্যান্ডলার
-muteBtn.addEventListener('click', () => {
+/*muteBtn.addEventListener('click', () => {
   isMuted = !isMuted;                        // ফ্ল্যাগ টগল
   endBell.muted = pleaseStop.muted = isMuted;// HTML5 muted প্রপার্টি সেট :contentReference[oaicite:4]{index=4}
   muteBtn.textContent = isMuted              // বাটন লেবেল আপডেট
     ? '🔇 Unmute' 
     : '🔊 Mute';
   muteBtn.classList.toggle('muted', isMuted);
+}); */
+
+// Grab elements
+const volumeIcon   = document.getElementById('volumeIcon');
+const volumeSlider = document.getElementById('volumeSlider');
+const audios       = [gong, endBell, fiveMinBell, lastFive, pleaseStop];
+
+// Track last non-zero volume so we can restore after unmute
+let lastVolume = parseFloat(volumeSlider.value);
+
+// Initialize volumes
+audios.forEach(a => a.volume = lastVolume);
+updateIconState();
+
+// 1) Slider input adjusts volume (& updates icon state)
+volumeSlider.addEventListener('input', e => {
+  const v = parseFloat(e.target.value);
+  audios.forEach(a => a.volume = v);
+  if (v > 0) lastVolume = v;
+  updateIconState();
 });
+
+// 2) Icon click toggles mute/unmute
+volumeIcon.addEventListener('click', () => {
+  if (volumeSlider.value > 0) {
+    // mute
+    volumeSlider.value = 0;
+  } else {
+    // unmute (restore lastVolume)
+    volumeSlider.value = lastVolume;
+  }
+  // trigger the input handler
+  volumeSlider.dispatchEvent(new Event('input'));
+});
+
+// Helper to update the icon’s appearance
+function updateIconState() {
+  if (parseFloat(volumeSlider.value) === 0) {
+    volumeIcon.classList.add('muted');
+    volumeIcon.textContent = '🔇';
+  } else {
+    volumeIcon.classList.remove('muted');
+    volumeIcon.textContent = '🔉';
+  }
+}
+
+// Also apply gain scaling to beep()
+function beep(duration = 150) {
+  try {
+    const ctx = new (window.AudioContext || window.webkitAudioContext)();
+    const osc = ctx.createOscillator();
+    osc.frequency.value = 1000;
+    const gain = ctx.createGain();
+    // baseGain × current slider volume
+    gain.gain.value = 0.2 * parseFloat(volumeSlider.value);
+    osc.connect(gain).connect(ctx.destination);
+    osc.start();
+    setTimeout(()=>{ osc.stop(); ctx.close(); }, duration);
+  } catch (e) {
+    console.warn('Beep failed:', e);
+  }
+}
 
 
 gong.load(); // নেটওয়ার্ক থেকে অবিলম্বে ফেচ করায়
@@ -385,16 +446,7 @@ document.querySelectorAll("button.adj").forEach(b=>b.onclick=()=>adjust(parseInt
 
 startBtn.onclick=startTimer1; pauseBtn.onclick=pauseTimer; resetBtn.onclick=resetTimer;
 
-/* ---------- beep + finish ---------- */
-function beep(){
-  try{
-    const ctx=new(window.AudioContext||window.webkitAudioContext)();
-    const osc=ctx.createOscillator(); osc.frequency.value=1000;
-    const gain=ctx.createGain(); gain.gain.value=0.15;
-    osc.connect(gain).connect(ctx.destination); osc.start();
-    setTimeout(()=>{osc.stop();ctx.close();},600);
-  }catch{}
-}
+
 function finish(){
   running=false; remain=0; drawPie(); updateEndLabel();
   pie.classList.add("shake"); beep();
