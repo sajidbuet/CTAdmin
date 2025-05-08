@@ -1,5 +1,5 @@
 # CTAdmin – Class Test Administration Tool
-
+![logo](https://github.com/sajidbuet/ctadmin/blob/main/docs/logo-512.png?raw=true)
 A lightweight, browser-based tool for BUET EEE instructors to:
 - **Generate seat plans** for different sections & seating patterns  
 - **Run synced timers** with visual pie-chart display  
