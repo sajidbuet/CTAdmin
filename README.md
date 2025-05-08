@@ -54,7 +54,7 @@ cd ctadmin
 
 
 ## 🛠️ Immediately Implementable Critical Features
-- [ ] **Pre count down** (add 3, 2, 1 countdown)
+- [X] **Pre count down** (add 3, 2, 1 countdown) - ✅ DONE
 - [ ] **Persistent Settings**  
   Store user preferences (theme, volume level, last-used duration, section choice) in `localStorage` so settings survive page reloads.
 

@@ -6,6 +6,9 @@ const fiveMinBell = document.getElementById('fiveMinBell'); //fiveMinBell  lastF
 const lastFive    = document.getElementById('lastFive');
 const pleaseStop = document.getElementById('pleaseStop');
 const muteBtn   = document.getElementById('muteBtn');
+const precountToggle   = document.getElementById('precountToggle');
+const precountOverlay  = document.getElementById('precountOverlay');
+
 let isMuted = false;
 let fiveMinFired = false;
 // মিউট বাটন ক্লিক হ্যান্ডলার
@@ -181,7 +184,7 @@ scaleSlider.addEventListener('input', e => {
 });
 
 
-console.log(dialSizes.large);
+//console.log(dialSizes.large);
 let currentSize = "large";
 
 function applyDialSize(sizeKey){
@@ -192,7 +195,8 @@ function applyDialSize(sizeKey){
   const svg   = document.getElementById("pie");
   const ring  = document.getElementById("pieFill");
   const bg    = svg.querySelector("circle");              // first circle
-  const text  = document.getElementById("timeLabel");
+  const timeLabel_text  = document.getElementById("timeLabel");
+  const precount_text  = document.getElementById("precount");
 
   svg.setAttribute("width",  s.w);
   svg.setAttribute("height", s.w);
@@ -212,9 +216,15 @@ function applyDialSize(sizeKey){
  FULL_LEN = realLen;       
   ring.setAttribute("transform", `rotate(-90 ${s.w/2} ${s.w/2})`);
 
-  text.setAttribute("x", s.w/2);
-  text.setAttribute("y", s.labelY);
-  text.setAttribute("font-size", s.font);
+  timeLabel_text.setAttribute("x", s.w/2);
+  timeLabel_text.setAttribute("y", s.labelY);
+  timeLabel_text.setAttribute("font-size", s.font);
+
+  
+
+  precount_text.setAttribute("x", s.w/2);
+  precount_text.setAttribute("y", s.labelY);
+  precount_text.setAttribute("font-size", s.font);
     // ── NEW: also scale the container ──
     const timerBox = document.getElementById('timerBox');
     if (sizeKey === 'large') {
@@ -238,7 +248,7 @@ function applyDialSize(sizeKey){
 let duration=1200, initialDuration = 1200, remain=1200, endTime=null, running=false;
 
 
-const pie=document.getElementById("pie"), fill=document.getElementById("pieFill"), label=document.getElementById("timeLabel");
+const pie=document.getElementById("pie"), fill=document.getElementById("pieFill"), timeLabel_text=document.getElementById("timeLabel"), precount_text  = document.getElementById("precount");
 const dateLbl=document.getElementById("dateTime"), endLbl=document.getElementById("endTime");
 const durInput=document.getElementById("durationInput");
 const startBtn=document.getElementById("startBtn"), pauseBtn=document.getElementById("pauseBtn"), resetBtn=document.getElementById("resetBtn");
@@ -248,13 +258,53 @@ function drawPie(){
   //const ratio=remain/duration;
   const ratio = remain / initialDuration;
   fill.style.strokeDashoffset=(FULL_LEN*(1-ratio)).toFixed(1);
-  label.textContent=fmt(remain);  //Math.floor(remain/duration*100);//
+  timeLabel_text.textContent=fmt(remain);  //Math.floor(remain/duration*100);//
 }
 function updateEndLabel(){endLbl.textContent=endTime?`Ends at ${endTime.toLocaleTimeString()}`:"";}
+
+
+// Override startTimer to include precount
+async function startTimer1(){
+  console.log('▶️ startTimer (async) called, precount=', precountToggle.checked);
+  if (running) return;
+  if (precountToggle.checked) {
+    // hide the normal digits while precounting
+    timeLabel_text.style.visibility = 'hidden';
+    await runPrecount();
+    timeLabel_text.style.visibility = '';  // show again
+  }
+  // then call your original start logic
+  _origStart();
+}
+
+// Likewise in finish():
+async function finish(){
+  console.log('Precount enabled?', precountToggle.checked);
+  running=false; remain=0; drawPie(); updateEndLabel();
+  pie.classList.add("shake"); beep();
+  startBtn.disabled=false; pauseBtn.disabled=true; resetBtn.disabled=false; pauseBtn.textContent="Pause";
+
+  if (precountToggle.checked) {
+    // run final 3-2-1 out
+    await runPrecount(true);
+  }
+
+  // now play your end bells
+  endBell.currentTime = 0;
+  if (!isMuted) {
+    endBell.play().catch(console.warn);
+    endBell.addEventListener('ended', () => {
+      pleaseStop.currentTime = 0;
+      pleaseStop.play().catch(console.warn);
+    }, { once: true });
+  }
+}
+
 
 /* ---------- controls ---------- */
 function startTimer(){
   if(running) return;
+  console.log('▶️ startTimer (original) called, precount=', precountToggle.checked);
 
   //duration=parseInt(durInput.value,10)*60;
   duration        = (+durInput.value || 10) * 60;
@@ -325,12 +375,15 @@ function adjust(sec){
   drawPie(); updateEndLabel();
 }
 
+// Save off the old logic
+const _origStart = startTimer;
+const _origFinish = finish;
 
 /* quick / adjust buttons */
-document.querySelectorAll("button.quick").forEach(b=>b.onclick=()=>{durInput.value=b.dataset.min; label.textContent=fmt(b.dataset.min*60);});
+document.querySelectorAll("button.quick").forEach(b=>b.onclick=()=>{durInput.value=b.dataset.min; timeLabel_text.textContent=fmt(b.dataset.min*60);});
 document.querySelectorAll("button.adj").forEach(b=>b.onclick=()=>adjust(parseInt(b.dataset.sec,10)));
 
-startBtn.onclick=startTimer; pauseBtn.onclick=pauseTimer; resetBtn.onclick=resetTimer;
+startBtn.onclick=startTimer1; pauseBtn.onclick=pauseTimer; resetBtn.onclick=resetTimer;
 
 /* ---------- beep + finish ---------- */
 function beep(){
@@ -368,6 +421,14 @@ function tick(){
   if(running){
     remain=Math.max(0, Math.ceil((endTime.getTime()-now.getTime())/1000));
     drawPie(); updateEndLabel();
+    if(remain===3) {
+      if (precountToggle.checked) {
+        // hide the normal digits while precounting
+        timeLabel_text.style.visibility = 'hidden';
+        runPrecount();
+        timeLabel_text.style.visibility = '';  // show again
+      }
+    }
     if(remain===0) finish();
   }
 
@@ -453,8 +514,8 @@ themeBtn.addEventListener('click', () => {
   themeBtn.classList.toggle('dark', isDark);
 });
 
-label.setAttribute('text-anchor', 'middle');
-label.setAttribute('dominant-baseline', 'middle');
+timeLabel_text.setAttribute('text-anchor', 'middle');
+timeLabel_text.setAttribute('dominant-baseline', 'middle');
 
 // 1) MIT license full text constant
 const MIT_TEXT = `MIT License
@@ -501,4 +562,49 @@ mitModal.addEventListener('click', e => {
     mitModal.style.display = 'none';
   }
 });
+
+
+async function runPrecount(reverse = false) {
+  // numbers to show
+  const nums = reverse ? [3,2,1] : [3,2,1];
+  const ring = document.getElementById('pieFill');
+  // temporarily speed up the ring
+  ring.style.animation = 'fastFill 3s linear';
+  timeLabel_text.setAttribute("display", "none");
+  precount_text.setAttribute("display", "block");
+  for (let n of nums) {
+    precount_text.textContent = n;
+    //precountOverlay.textContent = n;
+    //precountOverlay.classList.add('show');
+    // wait 1s
+    beep(200); 
+    await new Promise(r => setTimeout(r, 1000));
+  }
+
+  // clean up
+  ring.style.animation = '';
+  //precountOverlay.classList.remove('show');
+  precount_text.setAttribute("display", "none");
+  timeLabel_text.setAttribute("display", "block");
+}
+
+
+// 1) Make sure your beep() is accessible here:
+function beep(duration = 150) {
+  try {
+    const ctx = new (window.AudioContext || window.webkitAudioContext)();
+    const osc = ctx.createOscillator();
+    osc.frequency.value = 1000;       // 1 kHz
+    const gain = ctx.createGain();
+    gain.gain.value = 0.2;            // adjust volume
+    osc.connect(gain).connect(ctx.destination);
+    osc.start();
+    setTimeout(() => {
+      osc.stop();
+      ctx.close();
+    }, duration);
+  } catch (e) {
+    console.warn('Beep failed:', e);
+  }
+}
 
