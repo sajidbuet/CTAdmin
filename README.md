@@ -1,5 +1,5 @@
 # CTAdmin – Class Test Administration Tool
-
+![logo](https://github.com/sajidbuet/ctadmin/blob/main/docs/favicon.png?raw=true)
 A lightweight, browser-based tool for BUET EEE instructors to:
 - **Generate seat plans** for different sections & seating patterns  
 - **Run synced timers** with visual pie-chart display  
@@ -41,10 +41,7 @@ Simply clone this repo (or copy the `CTadmin` folder) into your web host:
 ```bash
 git clone https://github.com/<your-org>/ctadmin.git
 cd ctadmin
-
-
-Here are some ideas for future enhancements, formatted as a Markdown TODO list:
-
+```
 
 ## 🚀 Additional Feature Ideas
 - [ ] **Accessibility Mode**: Provide high-contrast theme, larger controls, and ARIA labels for screen readers.
@@ -57,7 +54,7 @@ Here are some ideas for future enhancements, formatted as a Markdown TODO list:
 
 
 ## 🛠️ Immediately Implementable Critical Features
-- [ ] ** Pre count down **
+- [ ] **Pre count down** (add 3, 2, 1 countdown)
 - [ ] **Persistent Settings**  
   Store user preferences (theme, volume level, last-used duration, section choice) in `localStorage` so settings survive page reloads.
 
