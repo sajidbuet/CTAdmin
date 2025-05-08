@@ -3,9 +3,14 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Class Test Administration Tool</title>
+  <title>CT Admin</title>
 
   <link rel="stylesheet" href="style.css" />
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="favicon.png">
+
+    <!-- Optional: preload logo -->
+    <link rel="preload" as="image" href="logo-512.png">
   <script src="app.js" defer></script>
   <audio id="gongStart" src="audio/gong-start.mp3" preload="auto"></audio>
   <audio id="endBell" src="audio/end-bell.mp3" preload="auto"></audio>
@@ -15,7 +20,6 @@
 </head>
 
 <body>
-
   <!-- ───────── Stopwatch sidebar ───────── -->
   <aside id="timerBox">
     <button id="closeTimerBtn" title="Close timer">✕</button>
@@ -73,8 +77,20 @@
   </aside>
 
   <!-- ───────── Seat‑Plan controls + toggle ───────── -->
-  <header>
-    <h2 style="display:inline-block">Class Test Administration Tool, Dept of EEE, BUET</h2>
+  <header style="display: flex; align-items: center; justify-content: center; gap: 1rem; padding: 1rem 0;">
+      <!-- Logo -->
+      <img src="logo-512.png" alt="CTAdmin Logo" style="height: 48px; display: inline-block;">
+  
+      <!-- Text titles -->
+      <div>
+        <h2 style="display: inline-block; margin: 0; font-size: 1.5rem; vertical-align: middle;">
+          CT Admin
+        </h2>
+        <h3 style="display: inline-block; margin: 0 0 0 1rem; font-size: 1.2rem; font-weight: normal; vertical-align: middle;">
+          Class Test Timer and Seat Plan
+        </h3>
+      </div>
+  
     <div class="controls">
       <button id="toggleTimerBtn" style="float:right;margin-top:4px">Hide Timer</button>
 
@@ -103,6 +119,7 @@
   </div>
     <br><br>
 
+    <div>
     <!-- (বাকি সেকশন, pattern ইত্যাদি আগের মতো) -->
     <label for="sectionSelect">Section&nbsp;:</label>
     <select id="sectionSelect">
@@ -128,6 +145,7 @@
     </select>
 
     <button id="generateBtn">Generate</button>
+  </div>
   </header>
 
   <div id="planHolder"></div>
