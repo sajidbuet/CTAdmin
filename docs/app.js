@@ -455,3 +455,50 @@ themeBtn.addEventListener('click', () => {
 
 label.setAttribute('text-anchor', 'middle');
 label.setAttribute('dominant-baseline', 'middle');
+
+// 1) MIT license full text constant
+const MIT_TEXT = `MIT License
+
+Copyright (c) ${new Date().getFullYear()} Dr. Sajid Muhaimin Choudhury
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+[...rest of MIT license text, e.g. from https://opensource.org/licenses/MIT...]
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+THE SOFTWARE.
+`;
+
+// 2) Elements
+const mitLink    = document.getElementById('mitLicenseLink');
+const mitModal   = document.getElementById('mitModal');
+const mitClose   = document.getElementById('mitCloseBtn');
+const mitTextEl  = document.getElementById('mitText');
+
+// 3) Show modal on click
+mitLink.addEventListener('click', () => {
+  mitTextEl.textContent = MIT_TEXT;  // inject text
+  mitModal.style.display = 'flex';
+});
+
+// 4) Close modal
+mitClose.addEventListener('click', () => {
+  mitModal.style.display = 'none';
+});
+// Also close if clicking outside the modal box
+mitModal.addEventListener('click', e => {
+  if (e.target === mitModal) {
+    mitModal.style.display = 'none';
+  }
+});
+
