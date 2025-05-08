@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Class Test Administration Tool</title>
+
+  <link rel="stylesheet" href="style.css" />
+  <script src="app.js" defer></script>
+  <audio id="gongStart" src="gong-start.mp3" preload="auto"></audio>
+  <audio id="endBell" src="end-bell.mp3" preload="auto"></audio>
+  <audio id="pleaseStop" src="please-stop-writing.mp3" preload="auto"></audio>
+  <audio id="fiveMinBell" src="5min-bell.mp3" preload="auto"></audio>
+  <audio id="lastFive" src="last-five-minutes.mp3" preload="auto"></audio>
+</head>
+
+<body>
+
+  <!-- ───────── Stopwatch sidebar ───────── -->
+  <aside id="timerBox">
+    <button id="closeTimerBtn" title="Close timer">✕</button>
+    <h3 style="text-align:center;margin:0 0 6px;color:#b00000;">Countdown</h3>
+
+    <!-- 240×240 pie‑chart -->
+<!-- 384 × 384 pie‑chart (↑ 60 %) -->
+<!-- 614 × 614 pie‑chart  (another +60 %) -->
+<svg id="pie" width="614" height="614" viewBox="0 0 614 614">
+  <!-- grey background ring -->
+  <circle  id="remainingmin" cx="307" cy="307" r="269"
+           fill="none" stroke="#ddd" stroke-width="61"/>
+
+  <!-- red progress ring -->
+  <circle  id="pieFill" cx="307" cy="307" r="269"
+           fill="none" stroke="#d20" stroke-width="61"
+           stroke-dasharray="1690" stroke-dashoffset="1690"
+           transform="rotate(-90 307 307)"/>
+
+  <!-- mm:ss label -->
+  <text id="timeLabel" x="307" y="352" text-anchor="middle"
+        font-family="Arial" font-size="184" fill="#222">00:00</text>
+</svg>
+
+  
+
+    <!-- live date‑time -->
+    <div id="dateTime"></div>
+    <!-- end‑time -->
+    <div id="endTime"></div>
+
+    <!-- duration picker -->
+    <div class="setRow" style="text-align:center;margin-top:8px">
+      <label for="durationInput">Minutes&nbsp;:</label>
+      <input id="durationInput" type="number" min="1" max="180" step="1" value="10">
+      <br>
+      <button class="quick" data-min="10">10</button>
+      <button class="quick" data-min="15">15</button>
+      <button class="quick" data-min="20">20</button>
+    </div>
+
+    <!-- adjust buttons -->
+    <div class="setRow" style="text-align:center;margin-top:6px">
+      <button class="adj" data-sec="60">+1 min</button>
+      <button class="adj" data-sec="300">+5 min</button>
+      <button class="adj" data-sec="30">+30 s</button>
+    </div>
+
+    <!-- controls -->
+    <div class="btnRow" style="text-align:center;margin-top:8px">
+      <button id="startBtn">Start</button>
+      <button id="pauseBtn" disabled>Pause</button>
+      <button id="resetBtn" disabled>Reset</button>
+    </div>
+  </aside>
+
+  <!-- ───────── Seat‑Plan controls + toggle ───────── -->
+  <header>
+    <h2 style="display:inline-block">Class Test Administration Tool, Dept of EEE, BUET</h2>
+    <div class="controls">
+      <button id="toggleTimerBtn" style="float:right;margin-top:4px">Hide Timer</button>
+
+    
+    <button id="muteBtn">🔊 Mute</button>
+    <button id="fsToggle" style="float:right;margin-top:4px" aria-label="Toggle Fullscreen">⛶ Fullscreen</button>
+    <button id="themeToggle">🌙 Dark Mode</button>
+    <button id="toggleSizeBtn"  style="float:right;margin-top:4px;margin-right:.5rem">
+      Smaller Timer
+    </button>
+    <!-- new slider wrapper -->
+<div id="scaleControl">
+  <label for="scaleSlider"></label>
+  <input
+    type="range"
+    id="scaleSlider"
+    min="1"
+    max="2"
+    step="0.1"
+    value="1.0"
+  >
+  <span id="scaleValue">1.0×</span>
+</div>
+    
+    
+  </div>
+    <br><br>
+
+    <!-- (বাকি সেকশন, pattern ইত্যাদি আগের মতো) -->
+    <label for="sectionSelect">Section&nbsp;:</label>
+    <select id="sectionSelect">
+      <option value="A">A (1‑65)</option><option value="B">B (66‑130)</option><option value="C">C (131‑195)</option>
+      <option value="A1">A1</option><option value="A2">A2</option>
+      <option value="B1">B1</option><option value="B2">B2</option>
+      <option value="C1">C1</option><option value="C2">C2</option>
+    </select>
+
+    <label for="startSide">Start side&nbsp;:</label>
+    <select id="startSide"><option value="left">Left</option><option value="right">Right</option></select>
+
+    <label for="startRow">Start row&nbsp;:</label>
+    <select id="startRow"><option value="top">Top</option><option value="bottom">Bottom</option></select>
+
+    <label for="pattern">Pattern&nbsp;:</label>
+    <select id="pattern">
+      <option value="raster">Raster (row→row)</option>
+      <option value="serpentine">Serpentine (row→row)</option>
+      <option value="raster-col">Raster (column→column)</option>
+      <option value="serpentine-col">Serpentine (column→column)</option>
+      <option value="random">Random</option>
+    </select>
+
+    <button id="generateBtn">Generate</button>
+  </header>
+
+  <div id="planHolder"></div>
+
+  <!-- simple beep (1 kHz) using Web Audio; fallback Audio tag optional -->
+   <!-- ……………………………………………………………  Seat‑plan container  …………………………………………………………… -->
+
+<!--  ───── copyright / credit notice ─────  -->
+<footer class="page-footer">
+  Made&nbsp;by&nbsp;
+  <a href="https://sajid.buet.ac.bd" target="_blank" rel="noopener">
+    Dr.&nbsp;Sajid&nbsp;Muhaimin&nbsp;Choudhury
+  </a>
+  using OpenAI o3
+</footer>
+</body>
+</html>
+
+</body>
+</html>
