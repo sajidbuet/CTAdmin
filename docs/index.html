@@ -92,7 +92,7 @@
           Class Test Timer and Seat Plan
         </h3>
       </div>
-  
+
     <div class="controls">
       <button id="toggleTimerBtn" style="float:right;margin-top:4px">Hide Timer</button>
 
@@ -106,6 +106,12 @@
       Smaller Timer
     </button>
     <!-- new slider wrapper -->
+       <!-- ── New row: Play / Pause / Stop ── -->
+  <div id="quickControls" class="controls-row">
+    <button id="playBtn"  class="qc-btn play"  title="Start Timer">▶︎</button>
+    <button id="pauseBtn2" class="qc-btn pause" title="Pause / Resume">⏸︎</button>
+    <button id="stopBtn"  class="qc-btn stop"  title="Stop & Reset">■</button>
+  </div>
 <div id="scaleControl">
   <label for="scaleSlider"></label>
   <span id="scaleValue">1.0×</span>
@@ -136,14 +142,17 @@
   >
 </div>  
 <label for="precountToggle" style="display:flex; align-items:center; gap:0.3rem;">
-  <input type="checkbox" id="precountToggle">
+  <input type="checkbox" id="precountToggle" checked  >
   Pre-Countdown
 </label>
     
     
   </div>
+  
     <br><br>
-
+    <button id="condenseBtn" class="qc-btn" title="Toggle Condensed UI">
+      🎛 Condensed
+    </button>
     <div>
     <!-- (বাকি সেকশন, pattern ইত্যাদি আগের মতো) -->
     <label for="sectionSelect">Section&nbsp;:</label>

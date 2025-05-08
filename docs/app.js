@@ -280,19 +280,23 @@ function applyDialSize(sizeKey){
   timeLabel_text.setAttribute("x", s.w/2);
   timeLabel_text.setAttribute("y", s.labelY);
   timeLabel_text.setAttribute("font-size", s.font);
-
+  timeLabel_text.setAttribute("text-anchor", "middle");
+  timeLabel_text.setAttribute("dominant-baseline", "middle");
   
 
   precount_text.setAttribute("x", s.w/2);
   precount_text.setAttribute("y", s.labelY);
   precount_text.setAttribute("font-size", s.font);
+
     // ── NEW: also scale the container ──
     const timerBox = document.getElementById('timerBox');
+    timerBox.style.position = "fixed";
+    timerBox.style.transformOrigin = "center center";
     if (sizeKey === 'large') {
       // center both horizontally and vertically, then scale
-      timerBox.style.top       = '50%';
+      timerBox.style.top       = '100%';
       timerBox.style.left      = '50%';
-      timerBox.style.transform = `translate(-50%, -50%) scale(${scaleFactor})`;
+      timerBox.style.transform = `translate(-50%, -100%) scale(${scaleFactor})`;
     } else {
       // back to small: restore original top positioning
       timerBox.style.top       = '1rem';
@@ -359,6 +363,7 @@ async function finish(){
       pleaseStop.play().catch(console.warn);
     }, { once: true });
   }
+  
 }
 
 
@@ -388,6 +393,7 @@ function startTimer(){
   } catch (err) {
     console.warn('Audio autoplay blocked:', err);
   }
+  updateQuickControls();
 }
 function pauseTimer(){
   if(!running){ // resume
@@ -397,6 +403,7 @@ function pauseTimer(){
   }else{
     running=false; pauseBtn.textContent="Resume";
   }
+  updateQuickControls();
 }
 function resetTimer(){
   running=false; 
@@ -407,6 +414,7 @@ function resetTimer(){
   endTime=null; drawPie(); updateEndLabel();
   pie.classList.remove("shake");
   startBtn.disabled=false; pauseBtn.disabled=true; resetBtn.disabled=true; pauseBtn.textContent="Pause";
+  updateQuickControls();
 }
 function adjust(sec){
   if(running){
@@ -459,6 +467,7 @@ function finish(){
     pleaseStop.currentTime = 0;
     pleaseStop.play().catch(err => console.warn('Autoplay blocked:', err));
   }, { once: true });
+  updateQuickControls();
 }
 
 /* ---------- master second‑tick ---------- */
@@ -660,3 +669,81 @@ function beep(duration = 150) {
   }
 }
 
+
+// 1) Grab the new buttons
+const playBtn   = document.getElementById('playBtn');
+const pauseBtn2 = document.getElementById('pauseBtn2');
+const stopBtn   = document.getElementById('stopBtn');
+
+// 2) Wire them to your existing functions
+playBtn.addEventListener('click', startTimer);
+pauseBtn2.addEventListener('click', pauseTimer);
+stopBtn.addEventListener('click', resetTimer);
+
+// 3) Centralize enable/disable logic
+function updateQuickControls() {
+  // play only when not running
+  playBtn.disabled = running;
+  // pause/resume only when running or paused
+  pauseBtn2.disabled = !running && remain === initialDuration;
+  // stop only when ever started
+  stopBtn.disabled = (remain === initialDuration && !running);
+
+  // update icon on pause button
+  pauseBtn2.textContent = running ? '⏸︎' : '▶︎';
+}
+
+// 4) Call updateQuickControls() wherever your state changes:
+//    - at end of startTimer()
+//    - at end of pauseTimer()
+//    - at end of resetTimer()
+//    - at end of finish()
+//    - and initially on load
+
+const condenseBtn = document.getElementById('condenseBtn');
+
+condenseBtn.addEventListener('click', () => {
+  const active = document.body.classList.toggle('condensed-ui');
+  condenseBtn.textContent = active
+    ? '🔍 Expanded'
+    : '🎛 Condensed';
+});
+
+// on load:
+if (localStorage.getItem('condensed') === 'true') {
+  document.body.classList.add('condensed-ui');
+  condenseBtn.textContent = '🔍 Expand';
+}
+
+// on toggle:
+condenseBtn.addEventListener('click', () => {
+  const isNow = document.body.classList.toggle('condensed-ui');
+  localStorage.setItem('condensed', isNow);
+  condenseBtn.textContent = isNow ? '🔍 Expand' : '🎛 Condense';
+});
+
+// Wrap everything in DOMContentLoaded to ensure elements exist
+document.addEventListener('DOMContentLoaded', () => {
+  const condenseBtn = document.getElementById('condenseBtn');
+  console.log('🚨 condenseBtn element:', condenseBtn);
+
+  if (!condenseBtn) {
+    console.error('❌ No element with id="condenseBtn" found.');
+    return;
+  }
+
+  // Initial state log
+  console.log('🚨 Initial body.classList:', document.body.classList.toString());
+
+  condenseBtn.addEventListener('click', () => {
+    console.log('🚨 condenseBtn clicked');
+    
+    // Toggle the class
+    const isNow = document.body.classList.toggle('condensed-ui');
+    console.log(`🚨 condensed-ui now ${isNow}`, document.body.classList.toString());
+
+    // Update button text
+    condenseBtn.textContent = isNow ? '🔍 Expanded' : '🎛 Condensed';
+    console.log('🚨 condenseBtn.textContent set to:', condenseBtn.textContent);
+  });
+});

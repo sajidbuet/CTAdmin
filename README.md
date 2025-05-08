@@ -44,7 +44,7 @@ cd ctadmin
 ```
 
 ## 🚀 Additional Feature Ideas
-- [ ] **Flexible Class Mode**: Provide settings for setting the number of rows and columns of the classroom.
+
 - [ ] **Accessibility Mode**: Provide high-contrast theme, larger controls, and ARIA labels for screen readers.
 - [ ] **PDF Export**: Add a “Download Seat Plan” button to export the generated plan as a PDF.
 - [ ] **Preset Templates**: Allow saving and loading of common timer durations or seat-plan configurations.
@@ -55,9 +55,9 @@ cd ctadmin
 - [X] **Pre count down** (add 3, 2, 1 countdown) - ✅ DONE
 - [X] **Audio Volume Slider**  - ✅ DONE
   Provide a slider to adjust cue volume directly in the UI, rather than relying solely on system settings.
+- [ ] **Flexible Class Mode**: Provide settings for setting the number of rows and columns of the classroom.
 - [ ] **Minimal Mode Toggle**  
   Offer a condensed UI toggle that hides all non-essential controls (only timer and seat-plan remain) for distraction-free exam environments.
-- [ ] **Volume Control**: Add a slider to adjust cue audio volume independently of system volume.
 - [ ] **Keyboard Shortcuts**  
   Implement shortcuts for key actions (e.g. “S” to Start/Pause, “R” to Reset, “M” to Mute/Unmute, arrow keys to adjust time).
 

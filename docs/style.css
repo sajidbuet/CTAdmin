@@ -64,8 +64,9 @@ header h2 {
 /* ─── Controls wrapper (timer, mute, fullscreen, theme) ─── */
 .controls {
   position: fixed;    /* fix to viewport, not the header */
-  top: 1rem;          /* same distance from top */
-  right: 1rem;        /* 1rem from the browser’s right edge */
+  top: 50%;                   /* halfway down the screen */
+  right: 1rem;                /* keep your existing horizontal offset */
+  transform: translateY(-50%);/* shift up by half its own height */
   display: flex;
   flex-direction: column;
   gap: .5rem;
@@ -464,4 +465,87 @@ select:disabled {
 #volumeControl input[type="range"] {
   width: 6rem;
   vertical-align: middle;
+}
+
+.controls-row {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+  justify-content: center;
+}
+.controls-row button{
+  width: 2.17rem;
+  padding: 0 0.7rem
+}
+
+/* base styling for quick-control buttons */
+.qc-btn {
+  width: 2.5rem;
+  height: 2.5rem;
+  border: none;
+  border-radius: 4px;
+  font-size: 1.2rem;
+  color: white;
+  cursor: pointer;
+  transition: opacity .15s;
+}
+
+/* individual colors */
+.qc-btn.play  { background: #28a745; } /* green */
+.qc-btn.pause { background: #ffc107; color: #222; } /* yellow */
+.qc-btn.stop  { background: #dc3545; } /* red */
+
+/* disabled state */
+.qc-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+/* when in condensed UI mode */
+body.condensed-ui {
+  /* hide the entire controls column */
+}
+body.condensed-ui .controls,
+body.condensed-ui #quickControls,
+body.condensed-ui #volumeControl,
+body.condensed-ui #themeToggle,
+body.condensed-ui #scaleControl,
+body.condensed-ui #toggleTimerBtn,
+body.condensed-ui #toggleSizeBtn {
+  display: none !important;
+}
+
+/* optionally hide seat-plan inputs too */
+body.condensed-ui #sectionSelect,
+body.condensed-ui #pattern,
+body.condensed-ui #startSide,
+body.condensed-ui #startRow,
+body.condensed-ui #generateBtn {
+  display: none !important;
+}
+
+/* leave timerBox, pie, timeLabel, dateTime, endTime visible */
+#condenseBtn {
+  position: fixed;
+  bottom: 1rem;
+  right: 1rem;
+  z-index: 1000;          /* make sure it sits above other content */
+  width: 8rem;
+  height: 2.5rem;
+  border: none;
+  border-radius: 4px;
+  background: var(--grey);
+  color: var(--txt);
+  font-size: 1.1rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+  transition: opacity .2s, transform .2s;
+}
+
+#condenseBtn:hover {
+  opacity: 0.8;
+  transform: scale(1.1);
 }
