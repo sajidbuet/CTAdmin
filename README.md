@@ -55,12 +55,11 @@ cd ctadmin
 - [X] **Pre count down** (add 3, 2, 1 countdown) - ✅ DONE
 - [X] **Audio Volume Slider**  - ✅ DONE
   Provide a slider to adjust cue volume directly in the UI, rather than relying solely on system settings.
-- [ ] **Flexible Class Mode**: Provide settings for setting the number of rows and columns of the classroom.
-- [ ] **Minimal Mode Toggle**  
+- [X] **Minimal Mode Toggle**   - ✅ DONE
   Offer a condensed UI toggle that hides all non-essential controls (only timer and seat-plan remain) for distraction-free exam environments.
+- [ ] **Flexible Class Mode**: Provide settings for setting the number of rows and columns of the classroom.
 - [ ] **Keyboard Shortcuts**  
   Implement shortcuts for key actions (e.g. “S” to Start/Pause, “R” to Reset, “M” to Mute/Unmute, arrow keys to adjust time).
-
 - [ ] **Persistent Settings**  
   Store user preferences (theme, volume level, last-used duration, section choice) in `localStorage` so settings survive page reloads.
 - [ ] **Auto–Save & Restore**  

@@ -511,7 +511,8 @@ body.condensed-ui #volumeControl,
 body.condensed-ui #themeToggle,
 body.condensed-ui #scaleControl,
 body.condensed-ui #toggleTimerBtn,
-body.condensed-ui #toggleSizeBtn {
+body.condensed-ui #toggleSizeBtn, 
+body.condensed-ui label{
   display: none !important;
 }
 
