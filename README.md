@@ -41,7 +41,7 @@ Simply clone this repo (or copy the `CTadmin` folder) into your web host:
 ```bash
 git clone https://github.com/<your-org>/ctadmin.git
 cd ctadmin
-
+```
 
 Here are some ideas for future enhancements, formatted as a Markdown TODO list:
 
