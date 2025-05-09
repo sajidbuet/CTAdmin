@@ -968,3 +968,17 @@ function renderPlan() {
 // Rebind the generate button
 generateBtn.onclick = renderPlan;
 */
+
+// 1) Grab the new button and the plan container
+const togglePlanBtn = document.getElementById('togglePlanBtn');
+const planContainer1 = document.getElementById('planHolder');
+
+// 2) Track visibility state
+let planVisible = true;
+
+// 3) Wire up the click handler
+togglePlanBtn.addEventListener('click', () => {
+  planVisible = !planVisible;
+  planContainer1.style.display = planVisible ? 'block' : 'none';
+  togglePlanBtn.textContent = planVisible ? 'Hide Plan' : 'Show Plan';
+});
