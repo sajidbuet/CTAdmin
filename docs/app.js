@@ -4,6 +4,7 @@ const gong = document.getElementById('gongStart');
 const endBell = document.getElementById('endBell');
 const fiveMinBell = document.getElementById('fiveMinBell'); //fiveMinBell  lastFive
 const lastFive    = document.getElementById('lastFive');
+const lastminute = document.getElementById('lastminute');
 const pleaseStop = document.getElementById('pleaseStop');
 //const muteBtn   = document.getElementById('muteBtn');
 const precountToggle   = document.getElementById('precountToggle');
@@ -11,6 +12,7 @@ const precountOverlay  = document.getElementById('precountOverlay');
 
 let isMuted = false;
 let fiveMinFired = false;
+let lastMinFired = false;
 // মিউট বাটন ক্লিক হ্যান্ডলার
 /*muteBtn.addEventListener('click', () => {
   isMuted = !isMuted;                        // ফ্ল্যাগ টগল
@@ -24,7 +26,7 @@ let fiveMinFired = false;
 // Grab elements
 const volumeIcon   = document.getElementById('volumeIcon');
 const volumeSlider = document.getElementById('volumeSlider');
-const audios       = [gong, endBell, fiveMinBell, lastFive, pleaseStop];
+const audios       = [gong, endBell, fiveMinBell, lastFive, lastminute, pleaseStop];
 
 // Track last non-zero volume so we can restore after unmute
 let lastVolume = parseFloat(volumeSlider.value);
@@ -378,8 +380,8 @@ function startTimer(){
   remain          = duration;
 
   if(!duration) return;
-  if(duration === 300) fiveMinFired = true;
-  else  fiveMinFired = true;
+  //if(duration === 300) fiveMinFired = true;
+  //else  fiveMinFired = true;
   remain=duration;
   endTime=new Date(Date.now()+remain*1000);
   running=true;
@@ -396,6 +398,33 @@ function startTimer(){
   lockDurationControls(true);
   updateQuickControls();
 }
+
+function PlayWarningSounds() {
+  //console.log('Remain=', remain)
+  if (remain === 300) {  //300
+    console.log('🕙 5 min fired', localStorage.getItem('condensed') === 'true');
+    fiveMinFired = true;
+    if (!isMuted) {
+      //adjust here //fiveMinBell  lastFive
+      fiveMinFired = false;
+      lastFive.currentTime = 0;
+      fiveMinBell.play().catch(err => console.warn('Autoplay blocked:', err));
+      fiveMinBell.addEventListener('ended', () => {
+        lastFive.currentTime = 0;
+        lastFive.play().catch(err => console.warn('Autoplay blocked:', err));
+      }, { once: true });
+    }
+  } 
+  if (remain === 60) { //60
+    lastMinFired = true;
+    if (!isMuted) {
+      //adjust here //fiveMinBell  lastFive
+      lastminute.currentTime = 0;
+      lastminute.play().catch(err => console.warn('Autoplay blocked:', err));
+    }
+  } 
+}
+
 function pauseTimer(){
   if(!running){ // resume
     if(remain<=0)return;
@@ -423,22 +452,9 @@ function adjust(sec){
   if(running){
     remain   = Math.max(0, remain + sec);     // only tweak the countdown
     endTime  = new Date(Date.now() + remain * 1000);
-    if (!fiveMinFired && remainingSeconds === 300) {
-      fiveMinFired = true;
-      if (!isMuted) {
-        //adjust here //fiveMinBell  lastFive
-        lastFive.currentTime = 0;
-        fiveMinBell.play().catch(err => console.warn('Autoplay blocked:', err));
-        fiveMinBell.addEventListener('ended', () => {
-          lastFive.currentTime = 0;
-          lastFive.play().catch(err => console.warn('Autoplay blocked:', err));
-        }, { once: true });
-      }
-      
-    }
+    console.log(' sec=', remain);
   } else {
     /* timer idle: change the preset duration */
-
     duration        = Math.max(0, duration + sec);
     initialDuration = duration;               // keep them in sync
     remain          = duration;
@@ -490,6 +506,7 @@ function tick(){
   /* timer */
   if(running){
     remain=Math.max(0, Math.ceil((endTime.getTime()-now.getTime())/1000));
+    //console.log ('tick=', remain);
     drawPie(); updateEndLabel();
     if(remain===3) {
       if (precountToggle.checked) {
@@ -500,6 +517,10 @@ function tick(){
       }
     }
     if(remain===0) finish();
+    
+    
+    PlayWarningSounds();
+    
   }
 
   /* schedule next tick aligned to real‑second boundary */
