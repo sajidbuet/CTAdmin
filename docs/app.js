@@ -296,9 +296,9 @@ function applyDialSize(sizeKey){
     timerBox.style.transformOrigin = "center center";
     if (sizeKey === 'large') {
       // center both horizontally and vertically, then scale
-      timerBox.style.top       = '100%';
+      timerBox.style.top       = '50%';
       timerBox.style.left      = '50%';
-      timerBox.style.transform = `translate(-50%, -100%) scale(${scaleFactor})`;
+      timerBox.style.transform = `translate(-50%, -30%) scale(${scaleFactor})`;
     } else {
       // back to small: restore original top positioning
       timerBox.style.top       = '1rem';
