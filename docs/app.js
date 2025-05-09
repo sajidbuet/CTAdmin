@@ -347,7 +347,7 @@ async function startTimer1(){
 // Likewise in finish():
 async function finish(){
   console.log('Precount enabled?', precountToggle.checked);
-  running=false; remain=0; drawPie(); updateEndLabel();
+  running=false; remain=0; updateEndLabel(); drawPie(); 
   pie.classList.add("shake"); beep();
   startBtn.disabled=false; pauseBtn.disabled=true; resetBtn.disabled=false; pauseBtn.textContent="Pause";
 
@@ -372,7 +372,7 @@ async function finish(){
 /* ---------- controls ---------- */
 function startTimer(){
   if(running) return;
-  console.log('▶️ startTimer (original) called, precount=', precountToggle.checked);
+  //console.log('▶️ startTimer (original) called, precount=', precountToggle.checked);
 
   //duration=parseInt(durInput.value,10)*60;
   duration        = (+durInput.value || 10) * 60;
@@ -380,6 +380,7 @@ function startTimer(){
   remain          = duration;
 
   if(!duration) return;
+  updateEndLabel();
   //if(duration === 300) fiveMinFired = true;
   //else  fiveMinFired = true;
   remain=duration;
@@ -387,7 +388,14 @@ function startTimer(){
   running=true;
   startBtn.disabled=true; pauseBtn.disabled=false; resetBtn.disabled=false;
   pie.classList.remove("shake");
-  drawPie(); updateEndLabel();
+  
+  drawPie(); 
+  PlayStartGong();
+  lockDurationControls(true);
+  updateQuickControls();
+}
+
+function PlayStartGong(){
   try {
     gong.currentTime = 0;
     if (isMuted) return; 
@@ -395,8 +403,6 @@ function startTimer(){
   } catch (err) {
     console.warn('Audio autoplay blocked:', err);
   }
-  lockDurationControls(true);
-  updateQuickControls();
 }
 
 function PlayWarningSounds() {
@@ -460,7 +466,7 @@ function adjust(sec){
     remain          = duration;
     durInput.value = Math.ceil(duration / 60);
   }
-  drawPie(); updateEndLabel();
+  updateEndLabel(); drawPie(); 
 }
 
 // Save off the old logic
@@ -507,7 +513,7 @@ function tick(){
   if(running){
     remain=Math.max(0, Math.ceil((endTime.getTime()-now.getTime())/1000));
     //console.log ('tick=', remain);
-    drawPie(); updateEndLabel();
+    updateEndLabel(); drawPie(); 
     if(remain===3) {
       if (precountToggle.checked) {
         // hide the normal digits while precounting
@@ -527,7 +533,7 @@ function tick(){
   const delay=1000-now.getMilliseconds();
   setTimeout(tick,delay);
 }
-drawPie(); updateEndLabel(); 
+updateEndLabel();  drawPie(); 
 applyDialSize("large");  
 tick();   // kick‑off master tick
 
@@ -681,7 +687,7 @@ document.head.appendChild(styleTag);
     //precountOverlay.textContent = n;
     //precountOverlay.classList.add('show');
     // wait 1s
-    beep(200); 
+    beep(150); 
     await new Promise(r => setTimeout(r, 1000));
   }
 
