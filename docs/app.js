@@ -685,7 +685,7 @@ const pauseBtn2 = document.getElementById('pauseBtn2');
 const stopBtn   = document.getElementById('stopBtn');
 
 // 2) Wire them to your existing functions
-playBtn.addEventListener('click', startTimer);
+playBtn.addEventListener('click', startTimer1);
 pauseBtn2.addEventListener('click', pauseTimer);
 stopBtn.addEventListener('click', resetTimer);
 
