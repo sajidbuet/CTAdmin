@@ -748,3 +748,25 @@ body.condensed-ui .duration-wrapper {
 #maxTimerBtn.fullscreen {
   color: var(--pri);    /* optional: indicate state */
 }
+
+/* Base state: dimmed */
+#closeTimerBtn,
+#maxTimerBtn {
+  opacity: 0.4;
+  transition: opacity 0.3s ease, transform 0.2s ease;
+}
+
+/* On hover: fade in and pop slightly */
+#closeTimerBtn:hover,
+#maxTimerBtn:hover {
+  opacity: 1;
+  transform: scale(1.1);
+}
+
+/* Optional: also when focused (keyboard users) */
+#closeTimerBtn:focus,
+#maxTimerBtn:focus {
+  opacity: 1;
+  transform: scale(1.1);
+  outline: 2px solid var(--pri);
+}
