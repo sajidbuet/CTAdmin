@@ -55,8 +55,20 @@
 
     <!-- duration picker -->
     <div class="setRow" style="text-align:center;margin-top:8px">
-      <label for="durationInput">Minutes&nbsp;:</label>
-      <input id="durationInput" type="number" min="1" max="180" step="1" value="10">
+      <div class="duration-wrapper-parent-container">
+      <div class="duration-wrapper">
+        <label for="durationInput" style="padding-left: 1rem;">Minutes&nbsp;:</label>
+        <input id="durationInput" type="number" min="1" max="180" step="1" value="20"> 
+        <div class="duration-spinner">
+          <button type="button" id="durInc" aria-label="Increase duration">▲</button>
+          <button type="button" id="durDec" aria-label="Decrease duration">▼</button>
+        </div>
+      </div>
+    </div>
+
+
+      <!-- <label for="durationInput">Minutes&nbsp;:</label>
+      <input id="durationInput" type="number" min="1" max="180" step="1" value="20"> -->
       <br>
       <button class="quick" data-min="10">10</button>
       <button class="quick" data-min="15">15</button>
@@ -72,7 +84,7 @@
 
     <!-- controls -->
     <div class="btnRow" style="text-align:center;margin-top:8px">
-      <button id="startBtn">Start</button>
+      <button id="startBtn" style="background-color: #28a745;  color: #fff;">Start</button>
       <button id="pauseBtn" disabled>Pause</button>
       <button id="resetBtn" disabled>Reset</button>
     </div>

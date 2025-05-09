@@ -393,6 +393,7 @@ function startTimer(){
   } catch (err) {
     console.warn('Audio autoplay blocked:', err);
   }
+  lockDurationControls(true);
   updateQuickControls();
 }
 function pauseTimer(){
@@ -414,7 +415,9 @@ function resetTimer(){
   endTime=null; drawPie(); updateEndLabel();
   pie.classList.remove("shake");
   startBtn.disabled=false; pauseBtn.disabled=true; resetBtn.disabled=true; pauseBtn.textContent="Pause";
+  lockDurationControls(false);
   updateQuickControls();
+  
 }
 function adjust(sec){
   if(running){
@@ -467,6 +470,7 @@ function finish(){
     pleaseStop.currentTime = 0;
     pleaseStop.play().catch(err => console.warn('Autoplay blocked:', err));
   }, { once: true });
+  lockDurationControls(false);
   updateQuickControls();
 }
 
@@ -705,12 +709,13 @@ const condenseBtn = document.getElementById('condenseBtn');
 condenseBtn.addEventListener('click', () => {
   const active = document.body.classList.toggle('condensed-ui');
   condenseBtn.textContent = active
-    ? '🔍 Expanded'
-    : '🎛 Condensed';
+    ? '🔍 Expande'
+    : '🎛 Condense';
 });
 
 // on load:
-if (localStorage.getItem('condensed') === 'true') {
+console.log('🚨 INITIAL LOAD localstorage condensed state: from THIS FUNC', localStorage.getItem('condensed') === 'true');
+if (localStorage.getItem('condensed') === 'false') {
   document.body.classList.add('condensed-ui');
   condenseBtn.textContent = '🔍 Expand';
 }
@@ -719,6 +724,10 @@ if (localStorage.getItem('condensed') === 'true') {
 condenseBtn.addEventListener('click', () => {
   const isNow = document.body.classList.toggle('condensed-ui');
   localStorage.setItem('condensed', isNow);
+  console.log('🚨 condenseBtn element from THIS FUNC:', condenseBtn);
+  console.log(`🚨 condensed-ui now ${isNow} from THIS FUNC`, document.body.classList.toString());
+  console.log('🚨 localstorage condensed state: from THIS FUNC', localStorage.getItem('condensed') === 'true');
+  
   condenseBtn.textContent = isNow ? '🔍 Expand' : '🎛 Condense';
 });
 
@@ -747,3 +756,35 @@ document.addEventListener('DOMContentLoaded', () => {
     console.log('🚨 condenseBtn.textContent set to:', condenseBtn.textContent);
   });
 });
+
+
+//const durInput = document.getElementById('durationInput');
+const durInc   = document.getElementById('durInc');
+const durDec   = document.getElementById('durDec');
+
+// step up
+durInc.addEventListener('click', () => {
+  durInput.value = Math.max(1, parseInt(durInput.value, 10) + 1);
+  resetTimer();            // or update any derived state
+});
+
+// step down
+durDec.addEventListener('click', () => {
+  durInput.value = Math.max(1, parseInt(durInput.value, 10) - 1);
+  resetTimer();            // keep UI in sync
+});
+
+// If you also respond to manual typing:
+durInput.addEventListener('change', () => {
+  durInput.value = Math.max(1, parseInt(durInput.value, 10) || 1);
+  resetTimer();
+});
+
+const quickBtns  = document.querySelectorAll("button.quick");
+
+function lockDurationControls(lock = true) {
+  durInput.disabled = lock;
+  durInc.disabled   = lock;
+  durDec.disabled   = lock;
+  quickBtns.forEach(b => b.disabled = lock);
+}

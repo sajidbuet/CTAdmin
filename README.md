@@ -57,11 +57,12 @@ cd ctadmin
   Provide a slider to adjust cue volume directly in the UI, rather than relying solely on system settings.
 - [X] **Minimal Mode Toggle**   - ✅ DONE
   Offer a condensed UI toggle that hides all non-essential controls (only timer and seat-plan remain) for distraction-free exam environments.
+- [ ] **Persistent Settings**  
+  Store user preferences (theme, volume level, section, start-side, start-row, pattern, pre-countdown, mute, last-used duration, section choice) in `localStorage` so settings survive page reloads.
 - [ ] **Flexible Class Mode**: Provide settings for setting the number of rows and columns of the classroom.
 - [ ] **Keyboard Shortcuts**  
   Implement shortcuts for key actions (e.g. “S” to Start/Pause, “R” to Reset, “M” to Mute/Unmute, arrow keys to adjust time).
-- [ ] **Persistent Settings**  
-  Store user preferences (theme, volume level, last-used duration, section choice) in `localStorage` so settings survive page reloads.
+
 - [ ] **Auto–Save & Restore**  
   Automatically save the current timer state (running/paused, remaining time) and seat-plan configuration so accidental navigations don’t reset progress.
 - [ ] **Quick-Start Presets**  

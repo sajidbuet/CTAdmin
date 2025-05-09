@@ -109,6 +109,8 @@ header h2 {
 #timerBox .btnRow {
   margin-top: .6rem;
   text-align: center;
+  justify-content: center;  /* centers children horizontally */
+
 }
 
 #closeTimerBtn {
@@ -141,7 +143,7 @@ header h2 {
 }
 
 #timerBox button {
-  margin: .25rem .25rem;
+  margin: .025rem .25rem;
   padding: .35rem .8rem;
   font-size: .9rem;
   border: none;
@@ -172,6 +174,7 @@ header h2 {
   padding: .2rem .3rem;
   border: 1px solid #ccc;
   border-radius: 4px;
+  text-align: center;
 }
 
 /* date & end-time text */
@@ -181,6 +184,8 @@ header h2 {
   text-align: center;
   font-size: 1.5rem;
   user-select: none;
+  padding-left: 2rem;
+  padding-right: 2rem;
 }
 #endTime {
   color: var(--pri);
@@ -517,6 +522,7 @@ body.condensed-ui #toggleTimerBtn,
 body.condensed-ui #toggleSizeBtn, 
 body.condensed-ui label,
 body.condensed-ui input{
+  
   display: none !important;
 }
 
@@ -525,7 +531,8 @@ body.condensed-ui #sectionSelect,
 body.condensed-ui #pattern,
 body.condensed-ui #startSide,
 body.condensed-ui #startRow,
-body.condensed-ui #generateBtn {
+body.condensed-ui #generateBtn,
+body.condensed-ui .duration-wrapper {
   display: none !important;
 }
 
@@ -553,4 +560,71 @@ body.condensed-ui #generateBtn {
 #condenseBtn:hover {
   opacity: 0.8;
   transform: scale(1.1);
+}
+
+.duration-wrapper-parent-container {
+  display: flex;
+  justify-content: center;  /* centers children horizontally */
+}
+/* 1) Make the wrapper a flex row */
+.duration-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  margin: 0 auto;        /* centers the wrapper */
+}
+/* 2) Double the textbox height */
+.duration-wrapper input[type="number"] {
+  flex: none;
+  width: 4.5rem;           /* whatever width you prefer */
+  height: 3rem;            /* e.g. double of ~1.5rem default */
+  padding-right: 0.5rem;   /* no need for big padding now */
+  font-size: 1rem;         /* adjust for larger box */
+  box-sizing: border-box;
+}
+
+/* 3) Spinner container sits beside the input, full height */
+.duration-spinner {
+  display: flex;
+  flex-direction: column;
+  height: 3rem;            /* match the input’s height */
+}
+
+/* 4) Each button takes half of that height */
+.duration-spinner button {
+  flex: none;
+  width: 1.5rem;           /* narrow square buttons */
+  height: 50%;             /* half of the 3rem wrapper */
+  border: none;
+  background: #f1f1f1;
+  cursor: pointer;
+  font-size: 0.8rem;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.duration-spinner button:hover {
+  background: #e0e0e0;
+}
+
+/* 5) Hide native spinner controls */
+.duration-wrapper input::-webkit-outer-spin
+
+
+
+/* Common button styling */
+/* match the specificity of “#timerBox button” by including its parent */
+#timerBox .btnRow > #startBtn {
+  background-color: #28a745;
+  color: #fff;
+}
+#pauseBtn {
+  background-color: #ffc107 !important;
+  color: #000 !important;
+}
+#resetBtn {
+  background-color: #dc3545 !important;
+  color: #fff !important;
 }
