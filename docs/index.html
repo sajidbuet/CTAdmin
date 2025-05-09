@@ -51,7 +51,7 @@
     <!-- live date‑time -->
     <div id="dateTime"></div>
     <!-- end‑time -->
-    <div id="endTime"></div>
+    <div id="endTime">.</div>
 
     <!-- duration picker -->
     <div class="setRow" style="text-align:center;margin-top:8px">
@@ -236,9 +236,49 @@
       <option value="random">Random</option>
     </select>
 
-    <button id="generateBtn">Generate</button>
+    <button id="generateBtn">Generate Seat Plan</button>
   </div>
   </header>
+
+  <!-- Gear Button trigger -->
+<button id="settingsGear" class="settings-gear" title="Settings">
+  ⚙️
+</button>
+
+<!-- Settings Modal -->
+<div id="settingsModal" class="modal-overlay" style="display:none;">
+  <div class="modal">
+    <button id="settingsClose" class="modal-close">✕</button>
+    <h2>Custom Settings</h2>
+    <label>
+      <input type="checkbox" id="useCustomSettings">
+      Use Custom Settings
+    </label>
+    <div id="customSettings" class="settings-group">
+      <label>Start Roll:
+        <input type="number" id="customStartRoll" min="1">
+      </label>
+      <label>Student Count:
+        <input type="number" id="customStudentCount" min="1">
+      </label>
+      <label>Section Label:
+        <input type="text" id="customSectionLabel">
+      </label>
+      <label>Seat Rows:
+        <input type="number" id="customSeatRows" min="1">
+      </label>
+      <label>Seat Columns:
+        <input type="number" id="customSeatCols" min="1">
+      </label>
+    </div>
+
+    <div class="settings-actions">
+      <button id="saveSettings">💾 Save</button>
+      <input type="file" id="loadSettings" accept=".json" style="display:none">
+      <button id="loadSettingsBtn">📂 Load</button>
+    </div>
+  </div>
+</div>
 
   <div id="planHolder"></div>
   <div id="precountOverlay"></div>

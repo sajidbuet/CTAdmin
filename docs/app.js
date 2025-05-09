@@ -147,9 +147,9 @@ function buildTable(rows,dense){
     html+="<tr>";
     if(dense){r.forEach((v,i)=>{if(i===6)html+='<td class="walkway"></td>';html+=seatCell(v);});}
     else{
-      for(let i=0;i<3;i++) html+=seatCell(r[i])+'<td class="blankcol"></td>';
+      for(let i=0;i<3;i++) html+=seatCell(r[i])+'<td class="seat"></td>'; //blankcol
       html+='<td class="walkway"></td>';
-      for(let i=3;i<6;i++) html+=seatCell(r[i])+'<td class="blankcol"></td>';
+      for(let i=3;i<6;i++) html+=seatCell(r[i])+'<td class="seat"></td>'; //blankcol
     }
     html+="</tr>";
   });
@@ -325,7 +325,7 @@ function drawPie(){
   fill.style.strokeDashoffset=(FULL_LEN*(1-ratio)).toFixed(1);
   timeLabel_text.textContent=fmt(remain);  //Math.floor(remain/duration*100);//
 }
-function updateEndLabel(){endLbl.textContent=endTime?`Ends at ${endTime.toLocaleTimeString()}`:"";}
+function updateEndLabel(){endLbl.textContent=endTime?`Ends at ${endTime.toLocaleTimeString()}`:"_";}
 
 
 // Override startTimer to include precount
@@ -452,7 +452,12 @@ const _origStart = startTimer;
 const _origFinish = finish;
 
 /* quick / adjust buttons */
-document.querySelectorAll("button.quick").forEach(b=>b.onclick=()=>{durInput.value=b.dataset.min; timeLabel_text.textContent=fmt(b.dataset.min*60);});
+document.querySelectorAll("button.quick").forEach(b=>b.onclick=()=>{
+  durInput.value=b.dataset.min; 
+  timeLabel_text.textContent=fmt(b.dataset.min*60);
+  updateEndLabel();
+  })
+  ;
 document.querySelectorAll("button.adj").forEach(b=>b.onclick=()=>adjust(parseInt(b.dataset.sec,10)));
 
 startBtn.onclick=startTimer1; pauseBtn.onclick=pauseTimer; resetBtn.onclick=resetTimer;
@@ -788,3 +793,157 @@ function lockDurationControls(lock = true) {
   durDec.disabled   = lock;
   quickBtns.forEach(b => b.disabled = lock);
 }
+
+
+
+// --- Settings Modal Elements ---
+const settingsGear   = document.getElementById('settingsGear');
+const settingsModal  = document.getElementById('settingsModal');
+const settingsClose  = document.getElementById('settingsClose');
+const useCustom      = document.getElementById('useCustomSettings');
+const customSection  = document.getElementById('customSettings');
+const inpStart       = document.getElementById('customStartRoll');
+const inpCount       = document.getElementById('customStudentCount');
+const inpLabel       = document.getElementById('customSectionLabel');
+const inpRows        = document.getElementById('customSeatRows');
+const inpCols        = document.getElementById('customSeatCols');
+const btnSave        = document.getElementById('saveSettings');
+const fileLoadInput  = document.getElementById('loadSettings');
+const btnLoad        = document.getElementById('loadSettingsBtn');
+
+// LocalStorage key
+const LS_KEY = 'ctadmin_customSettings';
+
+// Open modal
+settingsGear.addEventListener('click', () => {
+  loadSettingsFromStorage();
+  settingsModal.style.display = 'flex';
+});
+
+// Close modal
+settingsClose.addEventListener('click', () => {
+  settingsModal.style.display = 'none';
+});
+
+// Toggle custom inputs visibility
+useCustom.addEventListener('change', () => {
+  customSection.style.display = useCustom.checked ? 'block' : 'none';
+  saveSettingsToStorage();
+});
+
+// On any custom input change, save immediately
+[inpStart, inpCount, inpLabel, inpRows, inpCols].forEach(el => {
+  el.addEventListener('input', saveSettingsToStorage);
+});
+
+// Save button → export JSON
+btnSave.addEventListener('click', () => {
+  const data = getSettingsObject();
+  const blob = new Blob([JSON.stringify(data, null, 2)], {type:'application/json'});
+  const url  = URL.createObjectURL(blob);
+  const a    = document.createElement('a');
+  a.href     = url;
+  a.download = 'ctadmin-settings.json';
+  a.click();
+  URL.revokeObjectURL(url);
+});
+
+// Load button → trigger file picker
+btnLoad.addEventListener('click', () => fileLoadInput.click());
+
+// File input change → import JSON
+fileLoadInput.addEventListener('change', e => {
+  const file = e.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = () => {
+    try {
+      const data = JSON.parse(reader.result);
+      applySettingsObject(data);
+      saveSettingsToStorage();
+    } catch (err) {
+      alert('Invalid settings file');
+    }
+  };
+  reader.readAsText(file);
+});
+
+// Retrieve settings from inputs
+function getSettingsObject() {
+  return {
+    useCustom: useCustom.checked,
+    startRoll: +inpStart.value,
+    studentCount: +inpCount.value,
+    sectionLabel: inpLabel.value,
+    seatRows: +inpRows.value,
+    seatCols: +inpCols.value
+  };
+}
+
+// Apply a settings object to inputs
+function applySettingsObject(data) {
+  useCustom.checked                  = !!data.useCustom;
+  inpStart.value                     = data.startRoll   || inpStart.value;
+  inpCount.value                     = data.studentCount|| inpCount.value;
+  inpLabel.value                     = data.sectionLabel|| inpLabel.value;
+  inpRows.value                      = data.seatRows    || inpRows.value;
+  inpCols.value                      = data.seatCols    || inpCols.value;
+  customSection.style.display        = useCustom.checked ? 'block' : 'none';
+}
+
+// Save current settings to localStorage
+function saveSettingsToStorage() {
+  localStorage.setItem(LS_KEY, JSON.stringify(getSettingsObject()));
+}
+
+// Load settings from localStorage (if any)
+function loadSettingsFromStorage() {
+  const raw = localStorage.getItem(LS_KEY);
+  if (!raw) return;
+  try {
+    const data = JSON.parse(raw);
+    applySettingsObject(data);
+  } catch {
+    console.warn('Failed to parse saved settings');
+  }
+}
+
+// On app start, initialize from storage
+document.addEventListener('DOMContentLoaded', loadSettingsFromStorage);
+
+
+// Grab elements
+// Toggle visibility of custom inputs
+
+// Extend renderPlan() to incorporate custom settings
+/*
+SAJID: to add custom settings, change the buildTable function to accomodate custom row and custom columns
+*/
+
+/*const originalRenderPlan = renderPlan;
+function renderPlan() {
+  if (useCustom.checked) {
+    // Use custom values instead of SECTION_CFG
+    const start  = +inpStart.value;
+    const total  = +inpCount.value;
+    const rows   = +inpRows.value;
+    const cols   = +inpCols.value;
+    const label  = inpLabel.value || 'Custom';
+
+    // Build with fixed rows×cols, labeling as “Section <label>”
+    const seatRows = buildSeatRows(start, total, cols, {});
+    document.getElementById("planHolder").innerHTML =
+      `<div class="plan-container">
+         <h1>Seat Plan for Section ${label}</h1>
+         <div class="podium"></div>
+         ${buildTable(seatRows, false)}
+       </div>`;
+  } else {
+    // Fallback to original behavior
+    originalRenderPlan();
+  }
+}
+
+// Rebind the generate button
+generateBtn.onclick = renderPlan;
+*/

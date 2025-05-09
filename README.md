@@ -59,15 +59,12 @@ cd ctadmin
   Offer a condensed UI toggle that hides all non-essential controls (only timer and seat-plan remain) for distraction-free exam environments.
 - [ ] **Persistent Settings**  
   Store user preferences (theme, volume level, section, start-side, start-row, pattern, pre-countdown, mute, last-used duration, section choice) in `localStorage` so settings survive page reloads.
+- [ ] **Auto–Save & Restore**  
+  Automatically save the current timer state (running/paused, remaining time) and seat-plan configuration so accidental navigations don’t reset progress.
 - [ ] **Flexible Class Mode**: Provide settings for setting the number of rows and columns of the classroom.
 - [ ] **Keyboard Shortcuts**  
   Implement shortcuts for key actions (e.g. “S” to Start/Pause, “R” to Reset, “M” to Mute/Unmute, arrow keys to adjust time).
-
-- [ ] **Auto–Save & Restore**  
-  Automatically save the current timer state (running/paused, remaining time) and seat-plan configuration so accidental navigations don’t reset progress.
-- [ ] **Quick-Start Presets**  
-  Add buttons for common exam lengths (e.g. 10 min, 30 min, 1 hr) that instantly set the timer and start it with one click.
-- [ ] **Error-Boundary Handling**  
-  Gracefully catch and report any script errors (e.g. media load failures) via an on-screen alert banner, preventing silent failures.
 - [ ] **Print-Friendly Seat Plan**  
-  Add a “Print View” style that strips off controls and backgrounds, ensuring the seat-plan table prints neatly on paper.
+  Add a “Print View” style that strips off controls and backgrounds, ensuring the seat-plan table prints neatly on paper. 
+- [ ] **Download Seat Plan**  
+  One click download the seatplan as a PNG

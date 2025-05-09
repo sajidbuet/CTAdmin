@@ -76,7 +76,7 @@ header h2 {
   z-index: 1000;      /* ensure it sits above other elements */
 }
 .controls button, #generateBtn {
-  width: 8rem;
+  width: 9rem;
   border: 1px solid #666;
   border-radius: 6px;
   padding: .4rem .7rem;
@@ -627,4 +627,100 @@ body.condensed-ui .duration-wrapper {
 #resetBtn {
   background-color: #dc3545 !important;
   color: #fff !important;
+}
+
+
+.settings-panel {
+  background: var(--bg);
+  border: 1px solid var(--grey);
+  padding: 1rem;
+  margin: 1rem auto;
+  max-width: 400px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+.settings-panel h2 {
+  margin-top: 0;
+}
+.settings-panel label {
+  display: flex;
+  justify-content: space-between;
+  margin: 0.5rem 0;
+}
+.settings-group {
+  margin-top: 1rem;
+}
+.settings-group input {
+  width: 4rem;
+  text-align: right;
+}
+/* hidden by default */
+#customSettings {
+  display: none;
+}
+
+
+
+.settings-gear {
+  position: fixed;
+  bottom: 1rem;
+  left: 1rem;      /* move from right → left */
+  font-size: 2rem;
+  background: var(--btn-bg);
+  border: none;
+  border-radius: 50%;
+  padding: 0.5rem;
+  cursor: pointer;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+  z-index: 2000;
+}
+
+
+
+/* Modal backdrop */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2001;
+}
+
+/* Modal window */
+.modal {
+  background: var(--bg);
+  color: var(--txt);
+  padding: 1.5rem;
+  border-radius: 8px;
+  width: 90%;
+  max-width: 400px;
+  position: relative;
+}
+
+.modal-close {
+  position: absolute;
+  top: .5rem;
+  right: .5rem;
+  background: none;
+  border: none;
+  font-size: 1.2rem;
+  cursor: pointer;
+}
+
+.settings-group {
+  margin-top: 1rem;
+}
+
+.settings-group label {
+  display: flex;
+  justify-content: space-between;
+  margin: .5rem 0;
+}
+
+.settings-actions {
+  margin-top: 1rem;
+  display: flex;
+  gap: .5rem;
+  justify-content: flex-end;
 }
