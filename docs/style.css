@@ -115,7 +115,9 @@ header h2 {
 
 #closeTimerBtn {
   position:absolute;
-  right: 1em;
+  top: 6px;
+  right: 5px;          /* just left of close (which is at right:6px) */
+
 }
 
 #timerBox {
@@ -726,3 +728,23 @@ body.condensed-ui .duration-wrapper {
 }
 
 
+
+
+/* place restore/maximize beside close */
+#maxTimerBtn {
+  position: absolute;
+  top: 6px;
+  right: 45px;          /* just left of close (which is at right:6px) */
+  border: none;
+  background: transparent;
+  color: #666;
+  cursor: pointer;
+
+  transition: color .15s;
+}
+#maxTimerBtn:hover {
+  color: var(--pri);
+}
+#maxTimerBtn.fullscreen {
+  color: var(--pri);    /* optional: indicate state */
+}

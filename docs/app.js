@@ -296,7 +296,7 @@ function applyDialSize(sizeKey){
     timerBox.style.transformOrigin = "center center";
     if (sizeKey === 'large') {
       // center both horizontally and vertically, then scale
-      timerBox.style.top       = '50%';
+      timerBox.style.top       = '47%';
       timerBox.style.left      = '50%';
       timerBox.style.transform = `translate(-50%, -30%) scale(${scaleFactor})`;
     } else {
@@ -1000,4 +1000,78 @@ togglePlanBtn.addEventListener('click', () => {
   planVisible = !planVisible;
   planContainer1.style.display = planVisible ? 'block' : 'none';
   togglePlanBtn.textContent = planVisible ? 'Hide Plan' : 'Show Plan';
+});
+
+
+// 1) Grab the new button & plan container
+const maxBtn     = document.getElementById('maxTimerBtn');
+// 2) State storage
+let prev = {
+  seatVisible: true,
+  condensed:   false,
+  scale:       scaleFactor,
+  sizeKey:     currentSize,
+  isFS:        false
+};
+
+// 3) Helpers for fullscreen
+function enterFS() {
+  const el = document.documentElement;
+  if (el.requestFullscreen) return el.requestFullscreen();
+}
+function exitFS() {
+  if (document.exitFullscreen) return document.exitFullscreen();
+}
+function isFS() {
+  return !!(document.fullscreenElement);
+}
+
+// 4) Maximize/Restore handler
+maxBtn.addEventListener('click', async () => {
+  if (!maxBtn.classList.contains('restoring')) {
+    // ——— MAXIMIZE ———
+    // save current
+    prev = {
+      seatVisible: planHolder.style.display !== 'none',
+      condensed:   document.body.classList.contains('condensed-ui'),
+      scale:       scaleFactor,
+      sizeKey:     currentSize,
+      isFS:        isFS()
+    };
+
+    // hide plan, condense controls
+    planHolder.style.display = 'none';
+    document.body.classList.add('condensed-ui');
+
+    // bump timer size to 1.7×
+    scaleFactor = 1.6;
+    recomputeLarge();
+    applyDialSize('large');
+
+    // fullscreen if not already
+    if (!prev.isFS) await enterFS();
+
+    // switch icon & flag
+    maxBtn.textContent = '🗗'; // restore icon
+    maxBtn.classList.add('restoring');
+    timerBox.style.boxShadow = 'none';
+  } else {
+    // ——— RESTORE ———
+    // restore plan visibility & controls
+    planHolder.style.display = prev.seatVisible ? 'block' : 'none';
+    document.body.classList.toggle('condensed-ui', prev.condensed);
+
+    // restore timer size
+    scaleFactor = prev.scale;
+    recomputeLarge();
+    applyDialSize(prev.sizeKey);
+
+    // exit fullscreen if we entered it
+    if (!prev.isFS && isFS()) await exitFS();
+
+    // switch icon & flag
+    maxBtn.textContent = '⛶';
+    maxBtn.classList.remove('restoring');
+    timerBox.style.boxShadow = ''; // clears inline override
+  }
 });
