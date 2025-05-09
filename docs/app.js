@@ -743,7 +743,7 @@ document.addEventListener('DOMContentLoaded', () => {
     console.log(`🚨 condensed-ui now ${isNow}`, document.body.classList.toString());
 
     // Update button text
-    condenseBtn.textContent = isNow ? '🔍 Expanded' : '🎛 Condensed';
+    condenseBtn.textContent = isNow ? '🔍 Expand' : '🎛 Condense';
     console.log('🚨 condenseBtn.textContent set to:', condenseBtn.textContent);
   });
 });

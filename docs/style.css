@@ -25,6 +25,9 @@
   --circle-strk: #444;
 }
 
+.st0{fill:var(--txt);}
+.st1{fill:var(--pri);}
+
 #remainingmin{
   stroke: var(--circle-strk);
 }
@@ -512,7 +515,8 @@ body.condensed-ui #themeToggle,
 body.condensed-ui #scaleControl,
 body.condensed-ui #toggleTimerBtn,
 body.condensed-ui #toggleSizeBtn, 
-body.condensed-ui label{
+body.condensed-ui label,
+body.condensed-ui input{
   display: none !important;
 }
 
