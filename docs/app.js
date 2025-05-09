@@ -660,7 +660,20 @@ async function runPrecount(reverse = false) {
   const nums = reverse ? [3,2,1] : [3,2,1];
   const ring = document.getElementById('pieFill');
   // temporarily speed up the ring
-  ring.style.animation = 'fastFill 3s linear';
+  const offsetLen = 3 * ring.getTotalLength();
+// 2) Create a new <style> tag with your dynamic keyframes
+const styleTag = document.createElement('style');
+styleTag.textContent = `
+  @keyframes fastFill {
+    from { stroke-dashoffset: 0; }
+    to   { stroke-dashoffset: ${offsetLen}; }
+  }
+`;
+// 3) Inject it into the document
+document.head.appendChild(styleTag);
+
+// 4) Now apply the animation as before
+  ring.style.animation = 'fastFill 2.9s linear';
   timeLabel_text.setAttribute("display", "none");
   precount_text.setAttribute("display", "block");
   for (let n of nums) {
