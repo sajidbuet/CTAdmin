@@ -6,6 +6,8 @@ const fiveMinBell = document.getElementById('fiveMinBell'); //fiveMinBell  lastF
 const lastFive    = document.getElementById('lastFive');
 const lastminute = document.getElementById('lastminute');
 const pleaseStop = document.getElementById('pleaseStop');
+const ticksound = document.getElementById('ticksound');
+
 //const muteBtn   = document.getElementById('muteBtn');
 const precountToggle   = document.getElementById('precountToggle');
 const precountOverlay  = document.getElementById('precountOverlay');
@@ -26,7 +28,7 @@ let lastMinFired = false;
 // Grab elements
 const volumeIcon   = document.getElementById('volumeIcon');
 const volumeSlider = document.getElementById('volumeSlider');
-const audios       = [gong, endBell, fiveMinBell, lastFive, lastminute, pleaseStop];
+const audios       = [gong, endBell, fiveMinBell, lastFive, lastminute, pleaseStop, ticksound];
 
 // Track last non-zero volume so we can restore after unmute
 let lastVolume = parseFloat(volumeSlider.value);
@@ -66,6 +68,7 @@ function updateIconState() {
     volumeIcon.textContent = '🔉';
   }
 }
+
 
 // Also apply gain scaling to beep()
 function beep(duration = 150) {
@@ -348,7 +351,7 @@ async function startTimer1(){
 async function finish(){
   console.log('Precount enabled?', precountToggle.checked);
   running=false; remain=0; updateEndLabel(); drawPie(); 
-  pie.classList.add("shake"); beep();
+  pie.classList.add("shake"); 
   startBtn.disabled=false; pauseBtn.disabled=true; resetBtn.disabled=false; pauseBtn.textContent="Pause";
 
   if (precountToggle.checked) {
@@ -487,7 +490,7 @@ startBtn.onclick=startTimer1; pauseBtn.onclick=pauseTimer; resetBtn.onclick=rese
 
 function finish(){
   running=false; remain=0; drawPie(); updateEndLabel();
-  pie.classList.add("shake"); beep();
+  pie.classList.add("shake"); 
 
   startBtn.disabled=false; pauseBtn.disabled=true; resetBtn.disabled=false; pauseBtn.textContent="Pause";
   endBell.currentTime = 0;
@@ -687,7 +690,8 @@ document.head.appendChild(styleTag);
     //precountOverlay.textContent = n;
     //precountOverlay.classList.add('show');
     // wait 1s
-    beep(150); 
+    //beep(150); 
+    maketicksound();
     await new Promise(r => setTimeout(r, 1000));
   }
 
@@ -698,6 +702,13 @@ document.head.appendChild(styleTag);
   timeLabel_text.setAttribute("display", "block");
 }
 
+function maketicksound() {
+  if (!isMuted) {
+    //adjust here //fiveMinBell  lastFive
+    //ticksound.currentTime = 0;
+    ticksound.play().catch(err => console.warn('Autoplay blocked:', err));
+  }
+}
 
 // 1) Make sure your beep() is accessible here:
 function beep(duration = 150) {
