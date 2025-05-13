@@ -57,8 +57,10 @@ cd ctadmin
   Provide a slider to adjust cue volume directly in the UI, rather than relying solely on system settings.
 - [X] **Minimal Mode Toggle**   - ✅ DONE
   Offer a condensed UI toggle that hides all non-essential controls (only timer and seat-plan remain) for distraction-free exam environments.
-- [ ] **Maximize Timer Button**   - 
+- [X] **Maximize Timer Button**   - ✅ DONE 
   Pressing it would hide the seat plan, condense the controls and maximize the size of the timer (1.7x), full screen the window,  the maximize button is located beside the close button. once maximized, it would toggle the button to restore mode (restore previous values of expand/condense, full screen status, timer size, and seat plan visibility).
+- [X] **Persistent Timer**  - ✅ DONE 
+  Once timer starts, the end time will be saved in settings. On browser refresh or load, settings will be checked if the timer was running/paused. If timer was running, the end time and remaining time will be adjusted automatically. If timer was running it will continue to run.
 - [ ] **Persistent Settings**  
   Store user preferences (theme, volume level, section, start-side, start-row, pattern, pre-countdown, mute, last-used duration, section choice) in `localStorage` so settings survive page reloads.
 - [ ] **Auto–Save & Restore**  

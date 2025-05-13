@@ -1,3 +1,22 @@
+/* CTAdmin App Source Code */
+/* (c) Dr. Sajid Muhaimin Choudhury 2025 MIT License */
+/* Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+[...rest of MIT license text, e.g. from https://opensource.org/licenses/MIT...]
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+THE SOFTWARE. */
+
 /* ───────── Seat‑Plan (আগে যেমন) ───────── */
 
 const gong = document.getElementById('gongStart');
@@ -388,6 +407,8 @@ function startTimer(){
   //else  fiveMinFired = true;
   remain=duration;
   endTime=new Date(Date.now()+remain*1000);
+  saveTimerState({ status:'running', end:endTime.getTime(), initial:initialDuration });
+
   running=true;
   startBtn.disabled=true; pauseBtn.disabled=false; resetBtn.disabled=false;
   pie.classList.remove("shake");
@@ -439,13 +460,15 @@ function pauseTimer(){
     if(remain<=0)return;
     endTime=new Date(Date.now()+remain*1000);
     running=true; pauseBtn.textContent="Pause";
-  }else{
+  }else{ /* resume pressed */            // already set above
     running=false; pauseBtn.textContent="Resume";
+    saveTimerState({ status:'paused', remaining:remain, initial:initialDuration });
   }
   updateQuickControls();
 }
 function resetTimer(){
   running=false; 
+  clearTimerState();
   //remain=duration=parseInt(durInput.value,10)*60;
   duration        = (+durInput.value || 10) * 60;
   initialDuration = duration;          // ← and here
@@ -461,6 +484,7 @@ function adjust(sec){
   if(running){
     remain   = Math.max(0, remain + sec);     // only tweak the countdown
     endTime  = new Date(Date.now() + remain * 1000);
+    saveTimerState({ status:'running', end:endTime.getTime(), initial:initialDuration });
     console.log(' sec=', remain);
   } else {
     /* timer idle: change the preset duration */
@@ -490,6 +514,7 @@ startBtn.onclick=startTimer1; pauseBtn.onclick=pauseTimer; resetBtn.onclick=rese
 
 function finish(){
   running=false; remain=0; drawPie(); updateEndLabel();
+  clearTimerState();
   pie.classList.add("shake"); 
 
   startBtn.disabled=false; pauseBtn.disabled=true; resetBtn.disabled=false; pauseBtn.textContent="Pause";
@@ -1086,3 +1111,38 @@ maxBtn.addEventListener('click', async () => {
     timerBox.style.boxShadow = ''; // clears inline override
   }
 });
+
+
+/* ---------- NEW: persistence helpers ---------- */
+const TIMER_KEY = 'ct_timerState';
+function saveTimerState(obj)  { localStorage.setItem(TIMER_KEY, JSON.stringify(obj)); }
+function loadTimerState()     { try { return JSON.parse(localStorage.getItem(TIMER_KEY)); } catch{ return null; } }
+function clearTimerState()    { localStorage.removeItem(TIMER_KEY); }
+
+function restoreTimer() {
+    const st = loadTimerState();
+    if(!st) return;
+  
+    if(st.status === 'running') {
+      const rem = Math.max(0, Math.ceil((st.end - Date.now()) / 1000));
+      if(rem > 0) {
+        duration = initialDuration = st.initial || rem;
+        remain   = rem;
+        endTime  = new Date(Date.now() + rem*1000);
+        running  = true;
+        lockDurationControls(true);
+        startBtn.disabled = true;
+        pauseBtn.disabled = false;
+        resetBtn.disabled = false;
+      } else clearTimerState();                 // time already elapsed
+    } else if(st.status === 'paused') {
+        duration = initialDuration = st.initial || st.remaining;
+        remain   = st.remaining;
+        running  = false;
+        pauseBtn.textContent = 'Resume';
+        resetBtn.disabled    = false;
+    }
+    updateEndLabel(); drawPie(); updateQuickControls();
+  }
+  
+window.addEventListener('DOMContentLoaded', restoreTimer);
