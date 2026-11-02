@@ -2,6 +2,5 @@
 renderPlan();
 updateEndLabel();
 drawPie();
-applyDialSize('large');
 tick();
 restoreTimer();

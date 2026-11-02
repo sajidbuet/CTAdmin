@@ -1,774 +1,316 @@
-/* ─────────  Responsive + Modern Aesthetics  ───────── */
+/* CTAdmin – styles. Modes: setup (default), compact (phones), projection (body.mode-projection). */
 
-/* ---------- Color Variables & Theme Definitions ---------- */
+/* ───────── Tokens ───────── */
 :root {
-  /* Light theme colors */
-  --pri:    #AC1F24;
-  --bg:     #fafafa;
-  --txt:    #222;
-  --grey:   #e6e6e6;
-  --seat-w: clamp(44px,5.5vw,56px);
-  --gap-h:  clamp(8px,1vw,12px);
-  --btn-bg: #ececec; 
-  --btn-txt: #222;      /* light-mode button text */
-  --circle-strk: #ddd;
+  --pri: #AC1F24;
+  --pri-ink: #fff;
+  --bg: #f5f2f1;
+  --surface: #ffffff;
+  --txt: #1f1a1a;
+  --muted: #6b6262;
+  --line: #ddd5d4;
+  --ring: #e9e1e0;
+  --ok: #1f7a3d;
+  --warn: #f2b01e;
+  --danger: #b3261e;
+  --radius: 14px;
+  --shadow: 0 2px 14px rgba(40, 10, 10, .08);
+  --tap: 44px;
+}
+body.dark-theme {
+  --pri: #ff6b70;
+  --pri-ink: #1b0b0c;
+  --bg: #141011;
+  --surface: #1e191a;
+  --txt: #f1eaea;
+  --muted: #a79c9c;
+  --line: #3a3233;
+  --ring: #352d2e;
+  --shadow: 0 2px 14px rgba(0, 0, 0, .5);
 }
 
-.dark-theme {
-  /* Dark theme overrides */
-  --pri:    #ff5555;
-  --bg:     #1e1e1e;
-  --txt:    #ddd;
-  --grey:   #444;
-  --btn-bg: #444;             /* dark-mode button background */
-  --btn-txt: #ddd;      /* dark-mode button text */
-  --circle-strk: #444;
-}
-
-.st0{fill:var(--txt);}
-.st1{fill:var(--pri);}
-
-#remainingmin{
-  stroke: var(--circle-strk);
-}
-
-/* Apply theme colors */
+* { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
 body {
-  margin: 0 auto;
-  max-width: 1100px;
-  text-align: center;
+  margin: 0;
   background: var(--bg);
   color: var(--txt);
-  font-family: "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  font: 16px/1.4 "Segoe UI", system-ui, Roboto, Helvetica, Arial, sans-serif;
 }
+a { color: var(--pri); }
+.st0 { fill: var(--txt); }
+.st1 { fill: var(--pri); }
 
-/* Links and buttons accent */
-a, .page-footer a {
-  color: var(--pri);
-}
-
-/* ─── overall page alignment ─── */
-header {
-  position: relative;
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  gap: .6rem;
-  background: var(--bg);
+/* ───────── Buttons & inputs ───────── */
+.btn {
+  min-height: var(--tap);
+  padding: .45rem .9rem;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: var(--surface);
   color: var(--txt);
-}
-header h2 {
-  flex: 100%;
-  margin: .4rem 0;
-}
-
-
-
-/* ─── Controls wrapper (timer, mute, fullscreen, theme) ─── */
-.controls {
-  position: fixed;    /* fix to viewport, not the header */
-  top: 50%;                   /* halfway down the screen */
-  right: 1rem;                /* keep your existing horizontal offset */
-  transform: translateY(-50%);/* shift up by half its own height */
-  display: flex;
-  flex-direction: column;
-  gap: .5rem;
-  z-index: 1000;      /* ensure it sits above other elements */
-}
-.controls button, #generateBtn {
-  width: 9rem;
-  border: 1px solid #666;
-  border-radius: 6px;
-  padding: .4rem .7rem;
-  font-size: .85rem;
+  font: inherit;
+  font-weight: 600;
   cursor: pointer;
-  background: var(--btn-bg);
-  transition: .15s;
+  transition: background .15s, opacity .15s, transform .05s;
 }
+.btn:hover:not(:disabled) { background: color-mix(in srgb, var(--txt) 7%, var(--surface)); }
+.btn:active:not(:disabled) { transform: translateY(1px); }
+.btn:disabled { opacity: .4; cursor: not-allowed; }
+.btn:focus-visible, input:focus-visible, select:focus-visible, summary:focus-visible {
+  outline: 3px solid color-mix(in srgb, var(--pri) 60%, transparent);
+  outline-offset: 2px;
+}
+.btn.primary { background: var(--pri); color: var(--pri-ink); border-color: var(--pri); }
+.btn.primary:hover:not(:disabled) { background: color-mix(in srgb, var(--pri) 88%, #000); }
+.btn.go   { background: var(--ok); border-color: var(--ok); color: #fff; }
+.btn.warn { background: var(--warn); border-color: var(--warn); color: #231a00; }
+.btn.stop { background: var(--danger); border-color: var(--danger); color: #fff; }
+.btn.go:hover:not(:disabled), .btn.warn:hover:not(:disabled), .btn.stop:hover:not(:disabled) { filter: brightness(1.08); background: inherit; }
+.btn.chip { min-height: 38px; padding: .25rem .8rem; border-radius: 999px; font-weight: 500; }
+.btn.tool[aria-pressed="false"] { opacity: .55; }
 
-.controls button:hover:not(:disabled), #generateBtn:hover {
-  background: rgba(0,0,0,0.05);
-  color: var(--btn-txt);;
-}
-
-/* Mute button styling */
-#muteBtn.muted {
-  background: #f44336;
-  color: #fff;
-}
-
-/* Theme toggle button states */
-#themeToggle {
-  background: var(--btn-bg);
-  color: var(--btn-txt);;
-}
-
-
-/* ─── Stopwatch panel ─── */
-#setRow,
-#timerBox .btnRow {
-  margin-top: .6rem;
-  text-align: center;
-  justify-content: center;  /* centers children horizontally */
-
-}
-
-#closeTimerBtn {
-  position:absolute;
-  top: 6px;
-  right: 5px;          /* just left of close (which is at right:6px) */
-
-}
-
-#timerBox {
-  position: fixed;
-  left: 50%;
-  top: 1rem;
-  transform: translateX(-50%);
-  background: var(--bg) !important;
-  box-shadow: 0 4px 16px rgba(0,0,0,.98);
-  opacity: 1 !important;
-  backdrop-filter: none;
-  z-index: 99;
-}
-
-#timerBox h3 {
-  margin: 0 0 .5rem;
-  text-align: center;
-  color: var(--pri);
-  font-size: 1.2rem;
-}
-#timerBox svg {
-  display: block;
-  margin: 0 auto;
-  max-width: 100%;
-}
-
-#timerBox button {
-  margin: .025rem .25rem;
-  padding: .35rem .8rem;
-  font-size: .9rem;
-  border: none;
-  border-radius: 6px;
-  background: #ececec; 
-  cursor: pointer;
-  transition: .15s;
-  background: var(--btn-bg);
-  color: var(--btn-txt);;
-}
-#timerBox button:hover:not(:disabled) {
-  background: rgba(0,0,0,0.05);
-  color: var(--btn-txt);;
-}
-#timerBox button:disabled {
-  opacity: .45;
-  cursor: not-allowed;
-}
-#timerBox .quick {
-  background: var(--btn-bg);
-  border: 1px solid #ccc;
-  font-size: .8rem;
+select, input[type=number], input[type=text] {
+  min-height: var(--tap);
   padding: .3rem .7rem;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: var(--surface);
+  color: var(--txt);
+  font: inherit;
 }
-#timerBox input[type=number] {
-  width: 60px;
-  text-align: right;
-  padding: .2rem .3rem;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-  text-align: center;
-}
+input[type=range] { accent-color: var(--pri); }
+input[type=checkbox] { accent-color: var(--pri); width: 1.1rem; height: 1.1rem; }
+label.check { display: inline-flex; align-items: center; gap: .4rem; cursor: pointer; }
 
-/* date & end-time text */
-#dateTime,
-#endTime {
-  margin-top: .3rem;
-  text-align: center;
-  font-size: 1.5rem;
+/* ───────── App shell ───────── */
+.app { min-height: 100dvh; display: flex; flex-direction: column; }
+.topbar {
+  position: sticky; top: 0; z-index: 50;
+  display: flex; align-items: center; gap: .75rem;
+  padding: .55rem 1rem;
+  padding-left: max(1rem, env(safe-area-inset-left));
+  padding-right: max(1rem, env(safe-area-inset-right));
+  background: var(--surface);
+  border-bottom: 1px solid var(--line);
+}
+.brand { display: flex; align-items: center; gap: .65rem; flex: 1; min-width: 0; }
+.brand svg { height: 40px; width: 40px; flex: none; }
+.brand h1 { margin: 0; font-size: 1.15rem; line-height: 1.1; color: var(--pri); }
+.brand small { display: block; color: var(--muted); font-size: .8rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.actions { display: flex; gap: .4rem; flex-wrap: wrap; justify-content: flex-end; }
+.actions .ico { font-size: 1.05rem; }
+.actions .lbl { margin-left: .4rem; }
+
+#stage {
+  flex: 1;
+  display: grid;
+  grid-template-columns: minmax(340px, 400px) minmax(0, 1fr);
+  gap: 1rem;
+  padding: 1rem;
+  align-items: start;
+}
+body.hide-timer #timerBox, body.hide-plan #planPanel { display: none; }
+body.hide-timer #stage, body.hide-plan #stage { grid-template-columns: minmax(0, 1fr); }
+
+.page-footer { padding: 1rem; text-align: center; font-size: .85rem; color: var(--muted); }
+
+/* ───────── Timer card ───────── */
+#timerBox {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 1rem;
+  display: flex; flex-direction: column; align-items: center; gap: .6rem;
+}
+#pie { width: 100%; max-width: 420px; height: auto; display: block; }
+#remainingmin { stroke: var(--ring); }
+#timeLabel, #precount {
+  fill: var(--txt);
+  font-family: "Segoe UI", system-ui, Arial, sans-serif;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
   user-select: none;
-  padding-left: 2rem;
-  padding-right: 2rem;
 }
-#endTime {
-  color: var(--pri);
-}
+@keyframes shake { 0%,100% { transform: rotate(0); } 20% { transform: rotate(2deg); } 50% { transform: rotate(-2deg); } 80% { transform: rotate(1.5deg); } }
+#pie.shake { animation: shake .15s linear infinite; }
+@media (prefers-reduced-motion: reduce) { #pie.shake { animation: none; } }
 
-/* pie-chart text */
-#timeLabel{
-  user-select: none; 
-  fill: var(--txt);
-}
+.clock { text-align: center; user-select: none; }
+#dateTime { font-size: 1rem; color: var(--muted); }
+#endTime  { font-size: 1.25rem; font-weight: 600; color: var(--pri); min-height: 1.5em; }
 
-#precount {
-  user-select: none; 
-  fill: var(--txt);
-}
+.timer-controls { width: 100%; display: flex; flex-direction: column; gap: .7rem; align-items: center; }
+.duration-row { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: .5rem .7rem; }
+.stepper { display: flex; align-items: center; gap: .3rem; }
+.stepper input { width: 4.5rem; text-align: center; font-size: 1.2rem; font-weight: 600; -moz-appearance: textfield; }
+.stepper input::-webkit-outer-spin-button, .stepper input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+.stepper .btn { width: var(--tap); padding: 0; font-size: 1.3rem; }
+.chips { display: flex; flex-wrap: wrap; gap: .4rem; justify-content: center; }
+.run-row { display: grid; grid-template-columns: 1.4fr 1fr 1fr; gap: .5rem; width: 100%; }
+.run-row .btn { min-height: 52px; font-size: 1.05rem; }
+.sound-row { display: flex; align-items: center; gap: .6rem; flex-wrap: wrap; justify-content: center; }
+.sound-row .btn { width: var(--tap); padding: 0; }
+.sound-row input[type=range] { width: 8rem; }
+#volumeIcon.muted { opacity: .55; }
 
-/* plan heading centre */
-#planHolder h1 {
-  text-align: center;
-  margin-top: 1.4rem;
+/* ───────── Seat plan ───────── */
+#planPanel { min-width: 0; }
+.plan-options {
+  background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius);
+  padding: .6rem .9rem; margin-bottom: 1rem;
 }
+.plan-options summary { cursor: pointer; font-weight: 600; min-height: 32px; display: flex; align-items: center; }
+.opt-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: .6rem; margin-top: .6rem; align-items: end; text-align: left; }
+.opt-grid label { display: flex; flex-direction: column; gap: .25rem; font-size: .85rem; color: var(--muted); }
+.opt-grid select { color: var(--txt); }
 
-/* ─── Seat-plan table ─── */
-table {
-  border-collapse: separate;
-  border-spacing: 0 var(--gap-h);
-  margin: 1rem auto 2rem;
+#planHolder { container-type: inline-size; min-width: 0; overflow-x: auto; }
+.plan-container {
+  --cols: 12; --rows: 6;
+  --seat: max(34px, min(calc(100cqw / (var(--cols) + 1.6)), 72px));
+  display: flex; flex-direction: column; align-items: center;
 }
+.plan-container h1 { margin: .2rem 0 .5rem; font-size: 1.3rem; text-align: center; }
+.podium {
+  width: min(60%, 420px); height: 12px; margin-bottom: .4rem;
+  border-radius: 6px; background: var(--pri); opacity: .85;
+}
+.plan-container table { border-collapse: separate; border-spacing: 0 calc(var(--seat) * .12); margin: 0 auto; table-layout: fixed; }
 td.seat {
-  width: var(--seat-w);
-  height: clamp(36px,4.2vw,48px);
-  border: 1px solid #000;
-  border-radius: 4px;
+  width: var(--seat);
+  height: calc(var(--seat) * .98);
+  padding: calc(var(--seat) * .05) 0 0;
+  border: 1px solid color-mix(in srgb, var(--txt) 55%, transparent);
+  border-radius: calc(var(--seat) * .09);
+  background: var(--surface);
   text-align: center;
   vertical-align: top;
-  background: var(--bg);
-  font-weight: 600;
-  font-size: 1.5rem;
-  padding-top: 4px;
-  line-height: 1.05;
-}
-.seat-num {
-  display: block;
-}
-.chair {
-  width: 60%;
-  height: 32%;
-  margin: .25rem auto 0;
-  background: #666;
-  border-radius: 3px 3px 1px 1px;
-  position: relative;
-}
-.chair::before,
-.chair::after {
-  content: "";
-  position: absolute;
-  width: 14%;
-  height: 18%;
-  background: #666;
-  bottom: -18%;
-}
-.chair::before {
-  left: 8%;
-}
-.chair::after {
-  right: 8%;
-}
-
-.blankcol {
-  border: 1px solid #000;
-  width: calc(var(--seat-w) * .9);
-  background: #f8f8f8;
-}
-.walkway {
-  border: none;
-  width: clamp(48px,7vw,78px);
-  background: var(--grey);
-}
-
-/* ─── Timer shake when finished ─── */
-@keyframes shake {
-  0%,100% { transform: rotate(0); }
-  20%     { transform: rotate(3deg); }
-  50%     { transform: rotate(-3deg); }
-  80%     { transform: rotate(2deg); }
-}
-#pie.shake {
-  animation: shake .15s linear infinite;
-}
-
-/* ─── Responsive layout tweaks ─── */
-@media(max-width:680px) {
-  /* keep stopwatch on top for small screens */
-  #timerBox {
-    position: static;
-    margin: 0 auto 1rem;
-    display: block;
-  }
-}
-
-/* ─── footer credit ─── */
-.page-footer {
-  margin: 2rem 0 1rem;
-  font-size: .85rem;
-  color: #555;
-}
-.page-footer a {
-  text-decoration: none;
-  border-bottom: 1px solid transparent;
-}
-.page-footer a:hover {
-  border-color: var(--pri);
-}
-
-/* ─── Button hover tweaks ─── */
-#toggleTimerBtn:hover,
-#toggleSizeBtn:hover {
-  background: var(--grey); 
-}
-
-/* slider styling */
-#scaleControl {
-  
-  text-align: left;
-  font-size: .85rem;
-}
-#scaleControl label {
-  margin-right: .3rem;
-}
-#scaleControl input[type=range] {
-  vertical-align: middle;
-  width: 6rem;
-}
-#scaleControl span {
-  margin-left: .3rem;
-  width: 2rem;
-  display: inline-block;
-}
-
-
-/* ─── Theme-aware select styling ─── */
-select {
-  background: var(--btn-bg);
-  color: var(--btn-txt);
-  border: 1px solid #666;
-  border-radius: 6px;
-  padding: .4rem .7rem;
-  font-size: .85rem;
-  cursor: pointer;
-  transition: background .15s, color .15s;
-  /* optional: remove native arrow for custom styling */
-  appearance: none;
-  -moz-appearance: none;
-  -webkit-appearance: none;
-  background-image: url("data:image/svg+xml;charset=UTF-8,<svg xmlns='http://www.w3.org/2000/svg' width='8' height='6'><path fill='%23666' d='M0 0l4 6 4-6z'/></svg>");
-  background-repeat: no-repeat;
-  background-position: right .7rem center;
-  background-size: 8px 6px;
-}
-
-select:hover:not(:disabled),
-select:focus {
-  background: rgba(0,0,0,0.05);
-  outline: none;
-}
-
-/* ensure disabled selects look muted */
-select:disabled {
-  opacity: .6;
-  cursor: not-allowed;
-}
-
-
-/* Modal backdrop */
-.modal-overlay {
-  position: fixed;
-  top: 0; left: 0; right: 0; bottom: 0;
-  background: rgba(0,0,0,0.6);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 2000;
-}
-
-/* Modal window */
-.modal {
-  background: var(--bg);
-  color: var(--txt);
-  padding: 1.5rem;
-  max-width: 90%;
-  max-height: 80%;
-  overflow-y: auto;
-  border-radius: 8px;
-  box-shadow: 0 4px 16px rgba(0,0,0,0.4);
-  position: relative;
-}
-
-/* Close button */
-.modal-close {
-  position: absolute;
-  top: .5rem; right: .5rem;
-  background: transparent;
-  border: none;
-  font-size: 1.2rem;
-  cursor: pointer;
-}
-
-/* License text */
-.modal-text {
-  white-space: pre-wrap;
-  font-size: .9rem;
-  line-height: 1.4;
-}
-
-/* in styles.css */
-.page-header {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 1rem;
-  padding: 1rem 0;
-}
-.page-header img {
-  height: 48px;
-}
-.page-header h2,
-.page-header h3 {
-  display: inline-block;
-  margin: 0;
-  vertical-align: middle;
-}
-.page-header h2 { font-size: 1.5rem; }
-.page-header h3 {
-  font-size: 1.2rem;
-  margin-left: 1rem;
-  font-weight: normal;
-}
-
-/* full-screen overlay for 3-2-1 */
-#precountOverlay {
-  position: fixed;
-  top:0; left:0; right:0; bottom:0;
-  background: rgba(255,255,255,0.9);
-  display: flex; align-items: center; justify-content: center;
-  z-index: 3000;
-  font-size: 6rem; font-weight: bold;
-  color: var(--pri);
-  opacity: 0;
-  transition: opacity .2s;
-  pointer-events: none;
-}
-
-/* visible state */
-#precountOverlay.show {
-  opacity: 1;
-  pointer-events: all;
-}
-
-/* fast ring-fill animation */
-@keyframes fastFill {
-  from { stroke-dashoffset: 0 ; }
-  to   { stroke-dashoffset: 1800; }
-}
-
-#volumeControl {
-  display: flex;
-  align-items: center;
-  gap: 0.3rem;
-}
-
-#volumeIcon {
-  font-size: 1.2rem;
-  background: none;
-  border: none;
-  cursor: pointer;
-  color: var(--btn-txt);
-  transition: color .15s;
-  width: 2rem;
-}
-
-#volumeIcon.muted {
-  color: #999; /* dim the icon when muted */
-}
-
-#volumeControl input[type="range"] {
-  width: 6rem;
-  vertical-align: middle;
-}
-
-.controls-row {
-  display: flex;
-  gap: 0.5rem;
-  margin-top: 0.5rem;
-  justify-content: center;
-}
-.controls-row button{
-  width: 2.17rem;
-  padding: 0 0.7rem
-}
-
-/* base styling for quick-control buttons */
-.qc-btn {
-  width: 2.5rem;
-  height: 2.5rem;
-  border: none;
-  border-radius: 4px;
-  font-size: 1.2rem;
-  color: white;
-  cursor: pointer;
-  transition: opacity .15s;
-}
-
-/* individual colors */
-.qc-btn.play  { background: #28a745; } /* green */
-.qc-btn.pause { background: #ffc107; color: #222; } /* yellow */
-.qc-btn.stop  { background: #dc3545; } /* red */
-
-/* disabled state */
-.qc-btn:disabled {
-  opacity: 0.4;
-  cursor: not-allowed;
-}
-
-/* when in condensed UI mode */
-body.condensed-ui {
-  /* hide the entire controls column */
-}
-body.condensed-ui .controls,
-body.condensed-ui #quickControls,
-body.condensed-ui #volumeControl,
-body.condensed-ui #themeToggle,
-body.condensed-ui #scaleControl,
-body.condensed-ui #toggleTimerBtn,
-body.condensed-ui #toggleSizeBtn, 
-body.condensed-ui label,
-body.condensed-ui input{
-  
-  display: none !important;
-}
-
-/* optionally hide seat-plan inputs too */
-body.condensed-ui #sectionSelect,
-body.condensed-ui #pattern,
-body.condensed-ui #startSide,
-body.condensed-ui #startRow,
-body.condensed-ui #generateBtn,
-body.condensed-ui .duration-wrapper {
-  display: none !important;
-}
-
-/* leave timerBox, pie, timeLabel, dateTime, endTime visible */
-#condenseBtn {
-  position: fixed;
-  bottom: 1rem;
-  right: 1rem;
-  z-index: 1000;          /* make sure it sits above other content */
-  width: 8rem;
-  height: 2.5rem;
-  border: none;
-  border-radius: 4px;
-  background: var(--grey);
-  color: var(--txt);
-  font-size: 1.1rem;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.3);
-  transition: opacity .2s, transform .2s;
-}
-
-#condenseBtn:hover {
-  opacity: 0.8;
-  transform: scale(1.1);
-}
-
-.duration-wrapper-parent-container {
-  display: flex;
-  justify-content: center;  /* centers children horizontally */
-}
-/* 1) Make the wrapper a flex row */
-.duration-wrapper {
-  display: flex;
-  align-items: center;
-  gap: 0.25rem;
-  margin: 0 auto;        /* centers the wrapper */
-}
-/* 2) Double the textbox height */
-.duration-wrapper input[type="number"] {
-  flex: none;
-  width: 4.5rem;           /* whatever width you prefer */
-  height: 3rem;            /* e.g. double of ~1.5rem default */
-  padding-right: 0.5rem;   /* no need for big padding now */
-  font-size: 1rem;         /* adjust for larger box */
-  box-sizing: border-box;
-}
-
-/* 3) Spinner container sits beside the input, full height */
-.duration-spinner {
-  display: flex;
-  flex-direction: column;
-  height: 3rem;            /* match the input’s height */
-}
-
-/* 4) Each button takes half of that height */
-.duration-spinner button {
-  flex: none;
-  width: 1.5rem;           /* narrow square buttons */
-  height: 50%;             /* half of the 3rem wrapper */
-  border: none;
-  background: #f1f1f1;
-  cursor: pointer;
-  font-size: 0.8rem;
   line-height: 1;
-  display: flex;
-  align-items: center;
-  justify-content: center;
 }
-
-.duration-spinner button:hover {
-  background: #e0e0e0;
-}
-
-/* 5) Hide native spinner controls */
-.duration-wrapper input::-webkit-outer-spin-button,
-.duration-wrapper input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
-.duration-wrapper input[type="number"] { -moz-appearance: textfield; }
-
-
-
-/* Common button styling */
-/* match the specificity of “#timerBox button” by including its parent */
-#timerBox .btnRow > #startBtn {
-  background-color: #28a745;
-  color: #fff;
-}
-#pauseBtn {
-  background-color: #ffc107 !important;
-  color: #000 !important;
-}
-#resetBtn {
-  background-color: #dc3545 !important;
-  color: #fff !important;
-}
-
-
-.settings-panel {
-  background: var(--bg);
-  border: 1px solid var(--grey);
-  padding: 1rem;
-  margin: 1rem auto;
-  max-width: 400px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-}
-.settings-panel h2 {
-  margin-top: 0;
-}
-.settings-panel label {
-  display: flex;
-  justify-content: space-between;
-  margin: 0.5rem 0;
-}
-.settings-group {
-  margin-top: 1rem;
-}
-.settings-group input {
-  width: 4rem;
-  text-align: right;
-}
-/* hidden by default */
-#customSettings {
-  display: none;
-}
-
-
-
-.settings-gear {
-  position: fixed;
-  bottom: 1rem;
-  left: 1rem;      /* move from right → left */
-  font-size: 2rem;
-  background: var(--btn-bg);
-  border: none;
-  border-radius: 50%;
-  padding: 0.5rem;
-  cursor: pointer;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.2);
-  z-index: 2000;
-}
-
-
-
-/* Modal backdrop */
-.modal-overlay {
-  position: fixed;
-  inset: 0;
-  background: rgba(0,0,0,0.6);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 2001;
-}
-
-/* Modal window */
-.modal {
-  background: var(--bg);
-  color: var(--txt);
-  padding: 1.5rem;
-  border-radius: 8px;
-  width: 90%;
-  max-width: 400px;
+.seat-num { display: block; font-weight: 700; font-size: calc(var(--seat) * .4); font-variant-numeric: tabular-nums; }
+.chair {
   position: relative;
+  width: 58%; height: 26%;
+  margin: calc(var(--seat) * .06) auto 0;
+  background: color-mix(in srgb, var(--txt) 45%, var(--surface));
+  border-radius: 3px 3px 1px 1px;
+}
+.chair::before, .chair::after {
+  content: ""; position: absolute; width: 14%; height: 18%; bottom: -18%;
+  background: color-mix(in srgb, var(--txt) 45%, var(--surface));
+}
+.chair::before { left: 8%; }
+.chair::after  { right: 8%; }
+td.walkway { width: calc(var(--seat) * .6); border: none; background: transparent; }
+
+/* ───────── Modals ───────── */
+.modal-overlay {
+  position: fixed; inset: 0; z-index: 2001;
+  display: flex; align-items: center; justify-content: center;
+  background: rgba(0, 0, 0, .6); padding: 1rem;
+}
+.modal {
+  position: relative; width: 100%; max-width: 440px; max-height: 90dvh; overflow-y: auto;
+  background: var(--surface); color: var(--txt);
+  padding: 1.25rem 1.25rem 1rem; border-radius: var(--radius);
+  box-shadow: 0 8px 30px rgba(0, 0, 0, .4); text-align: left;
+}
+.modal h2 { margin: 0 0 .8rem; }
+.modal h3 { margin: 1.2rem 0 .5rem; font-size: 1rem; }
+.modal-close { position: absolute; top: .4rem; right: .4rem; width: var(--tap); height: var(--tap); background: none; border: none; font-size: 1.2rem; color: var(--txt); cursor: pointer; }
+.modal-text { white-space: pre-wrap; font-size: .85rem; line-height: 1.4; }
+.settings-group { margin-top: .6rem; }
+.settings-group label { display: flex; justify-content: space-between; align-items: center; gap: .8rem; margin: .5rem 0; }
+.settings-group input[type=number], .settings-group input[type=text] { width: 7rem; text-align: right; }
+#customSettings { display: none; }
+.settings-actions { margin-top: 1rem; display: flex; gap: .5rem; justify-content: flex-end; }
+
+/* ───────── Phone tab bar & projection bar (hidden by default) ───────── */
+#tabBar, #projBar { display: none; }
+
+/* ───────── Compact (phones / narrow windows) ───────── */
+@media (max-width: 899px) {
+  #stage { grid-template-columns: minmax(0, 1fr); }
+}
+@media (max-width: 700px) {
+  .brand small, .actions .lbl, #toggleTimerBtn, #togglePlanBtn { display: none; }
+  .actions .btn { width: var(--tap); padding: 0; }
+  .actions { flex-wrap: nowrap; }
+  #stage { padding: .6rem; padding-bottom: calc(var(--tap) + 1.4rem + env(safe-area-inset-bottom)); }
+  body[data-tab="timer"] #planPanel, body[data-tab="plan"] #timerBox { display: none; }
+  body.hide-timer #planPanel, body.hide-plan #timerBox { display: block; }
+  #tabBar {
+    display: flex; position: fixed; left: 0; right: 0; bottom: 0; z-index: 60;
+    background: var(--surface); border-top: 1px solid var(--line);
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+  #tabBar button {
+    flex: 1; min-height: 56px; border: none; background: none; color: var(--muted);
+    font: inherit; font-weight: 600; cursor: pointer;
+  }
+  #tabBar button.active { color: var(--pri); box-shadow: inset 0 3px 0 var(--pri); }
+  .run-row { grid-template-columns: 1.3fr 1fr 1fr; }
+  .page-footer { display: none; }
 }
 
-.modal-close {
-  position: absolute;
-  top: .5rem;
-  right: .5rem;
-  background: none;
-  border: none;
-  font-size: 1.2rem;
-  cursor: pointer;
+/* ───────── Projection mode ───────── */
+body.mode-projection { overflow: hidden; }
+body.mode-projection .topbar,
+body.mode-projection .page-footer,
+body.mode-projection .timer-controls,
+body.mode-projection .plan-options,
+body.mode-projection #tabBar { display: none !important; }
+body.mode-projection .app { height: 100dvh; min-height: 0; }
+body.mode-projection #stage {
+  height: 100dvh; padding: 2vmin; gap: 2vmin; align-items: stretch;
+  grid-template-columns: minmax(0, 1fr); grid-template-rows: minmax(0, 1fr);
 }
-
-.settings-group {
-  margin-top: 1rem;
+body.mode-projection #timerBox, body.mode-projection #planPanel { display: flex !important; min-height: 0; min-width: 0; }
+body.mode-projection #timerBox {
+  container-type: size;
+  justify-content: center; gap: 1.5vmin; padding: 2vmin;
 }
-
-.settings-group label {
-  display: flex;
-  justify-content: space-between;
-  margin: .5rem 0;
+body.mode-projection #pie { width: min(100cqw, calc(100cqh - 16vmin)); max-width: none; }
+body.mode-projection #dateTime { font-size: clamp(.9rem, 2.4vmin, 2.2rem); }
+body.mode-projection #endTime  { font-size: clamp(1.1rem, 3.6vmin, 3.4rem); }
+body.mode-projection #planPanel { flex-direction: column; }
+body.mode-projection #planHolder { container-type: size; flex: 1; min-height: 0; overflow: hidden; }
+body.mode-projection .plan-container {
+  height: 100cqh; justify-content: center;
+  --seat: min(calc(100cqw / (var(--cols) + 1.6)), calc((100cqh - 15cqh) / (var(--rows) * 1.16)));
 }
+body.mode-projection .plan-container h1 { font-size: 5.5cqh; margin: 0 0 1cqh; }
+body.mode-projection .podium { height: 1.6cqh; margin-bottom: 1cqh; }
 
-.settings-actions {
-  margin-top: 1rem;
-  display: flex;
-  gap: .5rem;
-  justify-content: flex-end;
+/* auto layout by screen shape: wide → side by side; squarish/portrait → stacked */
+@media (min-aspect-ratio: 13/10) {
+  body.mode-projection #stage { grid-template-columns: minmax(0, 1fr) minmax(0, 1.2fr); }
 }
-
-
-
-
-/* place restore/maximize beside close */
-#maxTimerBtn {
-  position: absolute;
-  top: 6px;
-  right: 45px;          /* just left of close (which is at right:6px) */
-  border: none;
-  background: transparent;
-  color: #666;
-  cursor: pointer;
-
-  transition: color .15s;
+@media (min-aspect-ratio: 16/10) {
+  body.mode-projection #stage { grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); }
 }
-#maxTimerBtn:hover {
-  color: var(--pri);
+@media (max-aspect-ratio: 13/10) {
+  body.mode-projection #stage { grid-template-rows: minmax(0, 5fr) minmax(0, 6fr); }
 }
-#maxTimerBtn.fullscreen {
-  color: var(--pri);    /* optional: indicate state */
-}
+/* manual overrides (Settings → Projection layout) */
+body.mode-projection[data-proj="side"] #stage  { grid-template-columns: minmax(0, 1fr) minmax(0, 1.3fr); grid-template-rows: minmax(0, 1fr); }
+body.mode-projection[data-proj="stack"] #stage { grid-template-columns: minmax(0, 1fr); grid-template-rows: minmax(0, 5fr) minmax(0, 6fr); }
+body.mode-projection[data-proj="timer"] #stage { grid-template-columns: minmax(0, 1fr); grid-template-rows: minmax(0, 1fr); }
+body.mode-projection[data-proj="timer"] #planPanel { display: none !important; }
+body.mode-projection[data-proj="plan"] #stage  { grid-template-columns: minmax(0, 1fr); grid-template-rows: minmax(0, 1fr); }
+body.mode-projection[data-proj="plan"] #timerBox { display: none !important; }
+body.hide-timer.mode-projection #timerBox, body.hide-plan.mode-projection #planPanel { display: flex !important; }
 
-/* Base state: dimmed */
-#closeTimerBtn,
-#maxTimerBtn {
-  opacity: 0.4;
-  transition: opacity 0.3s ease, transform 0.2s ease;
+/* floating controls */
+body.mode-projection #projBar {
+  display: flex; gap: .5rem; position: fixed; left: 50%; bottom: max(2vmin, env(safe-area-inset-bottom)); transform: translateX(-50%);
+  padding: .5rem; border-radius: 999px; z-index: 100;
+  background: color-mix(in srgb, var(--surface) 92%, transparent);
+  border: 1px solid var(--line); box-shadow: 0 6px 24px rgba(0, 0, 0, .35);
+  transition: opacity .3s;
 }
-
-/* On hover: fade in and pop slightly */
-#closeTimerBtn:hover,
-#maxTimerBtn:hover {
-  opacity: 1;
-  transform: scale(1.1);
-}
-
-/* Optional: also when focused (keyboard users) */
-#closeTimerBtn:focus,
-#maxTimerBtn:focus {
-  opacity: 1;
-  transform: scale(1.1);
-  
-}
+#projBar .btn { border-radius: 999px; min-width: 56px; min-height: 56px; font-size: 1.1rem; }
+body.mode-projection.idle #projBar { opacity: 0; pointer-events: none; }
+body.mode-projection.idle { cursor: none; }

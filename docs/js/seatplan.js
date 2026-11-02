@@ -59,8 +59,9 @@ function renderPlan() {
     serpentine: pattern.startsWith('serpentine'),
     random:     pattern === 'random',
   });
+  const cols = cfg.dense ? 12 : 12;   /* sparse = 6 seats + 6 blanks */
   document.getElementById('planHolder').innerHTML =
-    `<div class="plan-container"><h1>Seat Plan for Section ${section}</h1>
+    `<div class="plan-container" style="--cols:${cols};--rows:${rows.length}"><h1>Seat Plan for Section ${section}</h1>
      <div class="podium"></div>${buildTable(rows, cfg.dense)}</div>`;
 }
 document.getElementById('generateBtn').onclick = renderPlan;

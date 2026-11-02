@@ -8,8 +8,6 @@ const durInc = document.getElementById('durInc'), durDec = document.getElementBy
 const quickBtns = document.querySelectorAll('button.quick');
 const startBtn = document.getElementById('startBtn'), pauseBtn = document.getElementById('pauseBtn'),
       resetBtn = document.getElementById('resetBtn');
-const playBtn = document.getElementById('playBtn'), pauseBtn2 = document.getElementById('pauseBtn2'),
-      stopBtn = document.getElementById('stopBtn');
 
 const fmt = t => `${pad((t / 60) | 0)}:${pad(t % 60)}`;
 
@@ -172,12 +170,8 @@ function lockDurationControls(lock = true) {
   quickBtns.forEach(b => b.disabled = lock);
 }
 
-function updateQuickControls() {
-  playBtn.disabled = running;
-  pauseBtn2.disabled = !running && remain === initialDuration;
-  stopBtn.disabled = remain === initialDuration && !running;
-  pauseBtn2.textContent = running ? '⏸︎' : '▶︎';
-}
+/* other UI (projection bar) listens for this */
+function updateQuickControls() { document.dispatchEvent(new Event('timerstate')); }
 
 quickBtns.forEach(b => b.onclick = () => {
   durInput.value = b.dataset.min;
@@ -189,6 +183,6 @@ durInc.addEventListener('click', () => { durInput.value = Math.max(1, parseInt(d
 durDec.addEventListener('click', () => { durInput.value = Math.max(1, parseInt(durInput.value, 10) - 1); resetTimer(); });
 durInput.addEventListener('change', () => { durInput.value = Math.max(1, parseInt(durInput.value, 10) || 1); resetTimer(); });
 
-startBtn.onclick = playBtn.onclick = startWithPrecount;
-pauseBtn.onclick = pauseBtn2.onclick = pauseTimer;
-resetBtn.onclick = stopBtn.onclick = resetTimer;
+startBtn.onclick = startWithPrecount;
+pauseBtn.onclick = pauseTimer;
+resetBtn.onclick = resetTimer;
