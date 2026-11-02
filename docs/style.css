@@ -3,7 +3,7 @@
 /* ---------- Color Variables & Theme Definitions ---------- */
 :root {
   /* Light theme colors */
-  --pri:    #c40000;
+  --pri:    #AC1F24;
   --bg:     #fafafa;
   --txt:    #222;
   --grey:   #e6e6e6;
@@ -305,7 +305,7 @@ td.seat {
 /* ─── Button hover tweaks ─── */
 #toggleTimerBtn:hover,
 #toggleSizeBtn:hover {
-  background: var(----grey); 
+  background: var(--grey); 
 }
 
 /* slider styling */
@@ -612,7 +612,9 @@ body.condensed-ui .duration-wrapper {
 }
 
 /* 5) Hide native spinner controls */
-.duration-wrapper input::-webkit-outer-spin
+.duration-wrapper input::-webkit-outer-spin-button,
+.duration-wrapper input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+.duration-wrapper input[type="number"] { -moz-appearance: textfield; }
 
 
 
