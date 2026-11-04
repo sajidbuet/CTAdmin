@@ -26,6 +26,7 @@
   <script src="js/timer.js" defer></script>
   <script src="js/layouts.js" defer></script>
   <script src="js/settings.js" defer></script>
+  <script src="js/presets.js" defer></script>
   <script src="js/ui.js" defer></script>
   <script src="js/guard.js" defer></script>
   <script src="js/main.js" defer></script>
@@ -124,11 +125,7 @@
             <button type="button" id="durInc" class="btn tool" aria-label="One minute longer">+</button>
           </div>
           <span class="unit" aria-hidden="true">min</span>
-          <div class="chips">
-            <button class="quick btn chip" data-min="10" aria-label="Set 10 minutes">10</button>
-            <button class="quick btn chip" data-min="15" aria-label="Set 15 minutes">15</button>
-            <button class="quick btn chip" data-min="20" aria-label="Set 20 minutes">20</button>
-          </div>
+          <div id="presetChips" class="chips"></div>
         </div>
 
         <div class="chips adjust-row" role="group" aria-label="Adjust time">
@@ -265,6 +262,16 @@
         <label class="check"><input type="checkbox" data-cue="end" checked> Time up</label>
       </fieldset>
       <button id="testSound" class="btn tool">🔔 Test speakers</button>
+    </section>
+
+    <section id="setPresets" aria-labelledby="hPresets">
+      <h3 id="hPresets">Timer presets</h3>
+      <p class="note">Quick buttons under the duration. A preset can also switch the seat-plan layout.</p>
+      <div id="presetList"></div>
+      <div class="btn-row">
+        <button id="addPresetBtn" class="btn tool">＋ Add preset</button>
+        <button id="resetPresetsBtn" class="btn tool">Restore 10 / 15 / 20</button>
+      </div>
     </section>
 
     <section id="setPlan" aria-labelledby="hPlan">

@@ -169,6 +169,11 @@ body.hide-timer #stage, body.hide-plan #stage { grid-template-columns: minmax(0,
 .stepper .btn { width: var(--tap); padding: 0; font-size: 1.3rem; }
 .unit { color: var(--muted); margin-right: .3rem; }
 .chips { display: flex; flex-wrap: wrap; gap: .4rem; justify-content: center; }
+#presetChips .btn.chip { max-width: 9rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+/* preset editor rows (Settings → Timer presets) */
+.preset-row { display: grid; grid-template-columns: minmax(0, 1.3fr) 4.2rem minmax(0, 1fr) var(--tap); gap: .4rem; align-items: center; margin: .4rem 0; }
+.preset-head { margin-bottom: -.1rem; font-size: .8rem; font-weight: 600; color: var(--muted); }
+.preset-row input, .preset-row select { min-width: 0; width: 100%; }
 /* Bengali labels run wider than English: smaller chip text keeps the same rows (and so the same dial size) */
 :lang(bn) .timer-controls .btn.chip { font-size: .85rem; padding-inline: .55rem; }
 :lang(bn) .duration-row .unit { font-size: .9rem; }

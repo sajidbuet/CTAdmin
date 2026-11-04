@@ -10,7 +10,7 @@ let duration = clampDur(prefs.duration || 1200), initialDuration = duration, rem
 const precountToggle = $id('precountToggle');
 const dateLbl = $id('dateTime'), endLbl = $id('endTime');
 const durInput = $id('durationInput'), durInc = $id('durInc'), durDec = $id('durDec');
-const quickBtns = document.querySelectorAll('button.quick');
+const presetBtns = () => document.querySelectorAll('#presetChips button');   // rendered by presets.js
 const playBtns  = document.querySelectorAll('[data-action="play"]');
 const resetBtns = document.querySelectorAll('[data-action="reset"]');
 const srStatus  = $id('srStatus');
@@ -181,7 +181,7 @@ function syncButtons() {
   });
   const lock = st === 'running' || st === 'paused' || st === 'starting';
   durInput.disabled = durInc.disabled = durDec.disabled = lock;
-  quickBtns.forEach(b => b.disabled = lock);
+  presetBtns().forEach(b => b.disabled = lock);
   if (st !== lastStatus) {
     srStatus.textContent = t(STATUS_TEXT[st]); lastStatus = st;
     document.dispatchEvent(new CustomEvent('timerstate', { detail: st }));   // guard.js: wake lock, sound banner
@@ -245,7 +245,6 @@ function tick() {
 
 /* ---------- language: chip labels, and re-render everything above that shows text ---------- */
 function labelChips() {
-  quickBtns.forEach(b => { b.textContent = num(b.dataset.min); b.setAttribute('aria-label', t('Set {n} minutes', { n: +b.dataset.min })); });
   document.querySelectorAll('button.adj').forEach(b => {
     const sec = parseInt(b.dataset.sec, 10), sign = sec < 0 ? '−' : '+', a = Math.abs(sec);
     b.textContent = a % 60 ? t('{sign}{n} s', { sign, n: a }) : t('{sign}{n} min', { sign, n: a / 60 });
@@ -258,7 +257,6 @@ document.addEventListener('langchange', () => {
 });
 
 /* ---------- wiring ---------- */
-quickBtns.forEach(b => b.addEventListener('click', () => setDuration(b.dataset.min * 60)));
 document.querySelectorAll('button.adj').forEach(b => b.addEventListener('click', () => adjust(parseInt(b.dataset.sec, 10))));
 durInc.addEventListener('click', () => setDuration(duration + 60));
 durDec.addEventListener('click', () => setDuration(duration - 60));
