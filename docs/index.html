@@ -26,6 +26,7 @@
   <script src="js/layouts.js" defer></script>
   <script src="js/settings.js" defer></script>
   <script src="js/ui.js" defer></script>
+  <script src="js/guard.js" defer></script>
   <script src="js/main.js" defer></script>
 </head>
 
@@ -166,7 +167,7 @@
   <footer class="page-footer">
     Made&nbsp;by
     <a href="https://sajid.buet.ac.bd" target="_blank" rel="noopener">Dr.&nbsp;Sajid&nbsp;Muhaimin&nbsp;Choudhury</a>
-    using OpenAI o3. <a href="https://github.com/sajidbuet/ctadmin">Source code</a> on GitHub under the
+    using OpenAI o3 and Claude Opus. <a href="https://github.com/sajidbuet/ctadmin">Source code</a> on GitHub under the
     <a href="#license" id="mitLicenseLink">MIT license</a>.
   </footer>
 </div>
@@ -176,6 +177,12 @@
   <button id="tabTimer" class="active">⏱ Timer</button>
   <button id="tabPlan">🪑 Seat plan</button>
 </nav>
+
+<!-- ───────── Sound blocked by the browser (guard.js) ───────── -->
+<div id="soundBanner" class="sound-banner" role="alert" hidden>
+  <span>🔇 The browser is blocking sound until you click this page.</span>
+  <button id="soundBannerBtn" class="btn primary">Enable sound</button>
+</div>
 
 <!-- ───────── Projection controls (auto-hide) ───────── -->
 <div id="projBar" role="toolbar" aria-label="Projection controls">

@@ -79,7 +79,7 @@ I18N.bn = {
 
   /* ---- footer, tabs, projection bar ---- */
   'Made by': 'তৈরি করেছেন',
-  'using OpenAI o3.': '(OpenAI o3 ব্যবহার করে)।',
+  'using OpenAI o3 and Claude Opus.': '(OpenAI o3 ও Claude Opus ব্যবহার করে)।',
   'Source code': 'সোর্স কোড',
   'on GitHub under the': 'GitHub-এ উন্মুক্ত, লাইসেন্স:',
   'MIT license': 'MIT',
@@ -175,6 +175,10 @@ I18N.bn = {
   'Custom (from old settings)': 'কাস্টম (পুরোনো সেটিংস থেকে)',
   'Delete layout “{name}”?': '“{name}” লেআউটটি মুছে ফেলবেন?',
   'This file is not a CTAdmin layout.': 'এই ফাইলটি CTAdmin লেআউট নয়।',
+
+  /* ---- sound blocked banner ---- */
+  '🔇 The browser is blocking sound until you click this page.': '🔇 পেজে একবার ক্লিক না করা পর্যন্ত ব্রাউজার শব্দ বন্ধ রাখছে।',
+  'Enable sound': 'শব্দ চালু করুন',
 
   /* ---- settings: shortcuts ---- */
   'Keyboard shortcuts': 'কিবোর্ড শর্টকাট',

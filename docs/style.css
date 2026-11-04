@@ -413,6 +413,15 @@ body.mode-projection[data-proj="plan"] #stage  { grid-template-columns: minmax(0
 body.mode-projection[data-proj="plan"] #timerBox { display: none !important; }
 body.hide-timer.mode-projection #timerBox, body.hide-plan.mode-projection #planPanel { display: flex !important; }
 
+/* blocked-sound banner (stays visible in projection, above everything) */
+.sound-banner {
+  position: fixed; top: max(.6rem, env(safe-area-inset-top)); left: 50%; transform: translateX(-50%); z-index: 300;
+  display: flex; align-items: center; gap: .8rem; flex-wrap: wrap; justify-content: center;
+  width: max-content; max-width: calc(100vw - 16px); padding: .5rem .6rem .5rem 1rem; border-radius: 14px;
+  background: var(--surface); color: var(--txt); border: 2px solid var(--danger); box-shadow: 0 6px 24px rgba(0, 0, 0, .35); font-weight: 600;
+}
+.sound-banner[hidden] { display: none; }
+
 /* floating controls */
 body.mode-projection #projBar {
   display: flex; gap: .5rem; position: fixed; left: 50%; bottom: max(2vmin, env(safe-area-inset-bottom)); transform: translateX(-50%);

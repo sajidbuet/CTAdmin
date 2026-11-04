@@ -41,3 +41,19 @@ Decisions: restyle/modernize, keep the #AC1F24 accent (assumed from "AC1f24"; co
   - Bug fixed: cues used `remain === 300 / 60 / 3`, so a late tick (busy or background tab) that skipped that second silently dropped the 5-minute and 1-minute announcements and the closing 3-2-1. Cues now fire when a tick crosses the mark; the closing count starts from whatever is left (e.g. 2-1).
   - Accessibility: Lighthouse was not run (installing it was blocked in this environment). Instead: Chrome's accessibility tree shows no unnamed buttons/fields/links in setup, projection, settings, light/dark and Bengali; every input/select is labelled; no duplicate ids; `lang` follows the language; zoom not blocked; all visible text ≥ 5.3:1 contrast (AA needs 4.5:1; disabled controls exempt). A real Lighthouse run is still worth doing once.
 - Added on owner request: the projection bar has −1 min, +1 min, +5 min buttons (they change the running/paused countdown, or the duration when idle); on narrow screens the bar wraps to two rows.
+
+## Phase 6 – Exam-room reliability — DONE, awaiting owner review
+- Keep the screen awake while a test is starting/running/paused (Screen Wake Lock; re-acquired when the tab becomes visible again).
+- Sound blocked: after a reload mid-test the browser may refuse to play cues until the page is clicked. Show a banner (“click to enable sound”) when that is likely or when a cue is refused.
+- Background tab: drive the once-a-second tick from a small Worker (worker timers are not slowed like page timers in hidden tabs), falling back to page timers if a Worker can't start. Show the remaining time in the tab title while a test runs.
+- As built: `js/guard.js` (wake lock + banner); `timer.js` fires a `timerstate` event on status changes and runs its beat from a Blob-URL Worker (works from `file://`). Wake lock is held while starting/running/paused and re-requested on `visibilitychange`. Banner shows when a test is restored by a reload before any click (`navigator.userActivation.hasBeenActive` false) or when a cue is refused (`NotAllowedError`); any click/key hides it. Tab title: “mm:ss – CT Admin” (⏸ when paused). Tested: worker beat, title, wake lock acquired, banner on reload, banner on a refused cue with Chrome's normal autoplay policy and gone after one click (sound then plays). Hidden-tab run (2 tabs hidden for 7 min, test ending at 7:00): Worker beat max gap 1.02 s, old page-timer beat 1.34 s; every cue on time in both. Headless Chrome did not apply its once-a-minute throttling to either tab, so the Worker's benefit against that throttling is not demonstrated by this test.
+- Footer (owner request): “Made by Dr. Sajid Muhaimin Choudhury using OpenAI o3 and Claude Opus. Source code on GitHub under the MIT license.”
+
+## Phase 7 – Offline / installable app
+- `manifest.webmanifest` (name, icons 192/512, theme colour, standalone) and a service worker (`sw.js`): network-first for pages/scripts/styles so updates arrive, cache-first for audio, fonts, images. Only registered over http(s); `file://` keeps working as now.
+
+## Phase 8 – README
+- Rewrite for the current app: modes, controls, shortcuts, layouts, Bengali, offline use, `file://` use, credits/licences (Noto Sans Bengali OFL, edge-tts voice).
+
+## Phase 9 – Timer presets
+- The 10/15/20 chips become user presets (label, minutes, optional layout to switch to). Edited in Settings; saved in `ct_prefs`.

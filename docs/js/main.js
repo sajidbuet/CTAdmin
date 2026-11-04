@@ -2,5 +2,6 @@
 renderPlan();
 updateEndLabel();
 drawPie();
-tick();
+startTicking();
 restoreTimer();
+

@@ -21,6 +21,7 @@ const timerStatus = () => running ? 'running' : paused ? 'paused' : starting ? '
 function drawPie() {
   fill.style.strokeDashoffset = (FULL_LEN * (1 - remain / initialDuration)).toFixed(1);
   timeLabel_text.textContent = fmt(remain);
+  document.title = running || paused ? `${paused ? '⏸ ' : ''}${fmt(remain)} – CT Admin` : 'CT Admin';   // visible on the tab
   pie.setAttribute('aria-label', t('Time remaining {time}', { time: fmt(remain) }));
 }
 function updateEndLabel() {
@@ -181,7 +182,10 @@ function syncButtons() {
   const lock = st === 'running' || st === 'paused' || st === 'starting';
   durInput.disabled = durInc.disabled = durDec.disabled = lock;
   quickBtns.forEach(b => b.disabled = lock);
-  if (st !== lastStatus) { srStatus.textContent = t(STATUS_TEXT[st]); lastStatus = st; }
+  if (st !== lastStatus) {
+    srStatus.textContent = t(STATUS_TEXT[st]); lastStatus = st;
+    document.dispatchEvent(new CustomEvent('timerstate', { detail: st }));   // guard.js: wake lock, sound banner
+  }
 }
 
 /* ---------- 3-2-1 pre-count ---------- */
@@ -209,6 +213,19 @@ function showClock(now = new Date()) {
   const loc = userLocale();
   dateLbl.textContent = `${now.toLocaleDateString(loc, { day: '2-digit', month: 'long', year: 'numeric' })} ${now.toLocaleTimeString(loc)}`;
 }
+/* The beat comes from a Worker: in a hidden tab Chrome may hold page timers back to once a minute,
+   but not a worker's. Falls back to a page timer chain if a Worker can't start. */
+let tickWorker = null;
+function startTicking() {
+  try {
+    const src = 'const beat = () => setTimeout(() => { postMessage(0); beat(); }, 1000 - Date.now() % 1000); beat();';
+    tickWorker = new Worker(URL.createObjectURL(new Blob([src], { type: 'text/javascript' })));
+    tickWorker.onmessage = () => tick();
+    tickWorker.onerror = () => { tickWorker.terminate(); tickWorker = null; tick(); };
+  } catch { tickWorker = null; }
+  tick();
+}
+
 let prevRemain = null;                               // remaining seconds at the previous running tick
 function tick() {
   const now = new Date();
@@ -223,7 +240,7 @@ function tick() {
     playWarningSounds(crossed);
     prevRemain = running ? remain : null;
   } else prevRemain = null;
-  setTimeout(tick, 1000 - now.getMilliseconds());
+  if (!tickWorker) setTimeout(tick, 1000 - now.getMilliseconds());
 }
 
 /* ---------- language: chip labels, and re-render everything above that shows text ---------- */
