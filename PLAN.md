@@ -53,8 +53,9 @@ Decisions: restyle/modernize, keep the #AC1F24 accent (assumed from "AC1f24"; co
 - `manifest.webmanifest` (name, icons 192/512, theme colour, standalone) and a service worker (`sw.js`): network-first for pages/scripts/styles so updates arrive, cache-first for audio, fonts, images. Only registered over http(s); `file://` keeps working as now.
 - As built: `docs/manifest.webmanifest`, `docs/icons/icon-{192,512}.png` (from `logo.png`), `docs/sw.js` (`VERSION`, `PRECACHE` of all 31 app files incl. Bengali audio and font; 3 s network timeout before falling back to cache). Manifest link and registration are added by `main.js` only over http(s), so `file://` gets no console errors. Tested on a local server: worker activates and controls the page, 31 cached entries, Chrome reports no manifest or installability errors; with the network cut, a reload loads the full app, all English and Bengali audio, the Bengali font, and the timer runs and plays the gong. Live site (verified): https://sajidlab.org/CTAdmin/ (HTTPS, so install/offline will work there once deployed).
 
-## Phase 8 – README
+## Phase 8 – README — DONE, awaiting owner review
 - Rewrite for the current app: modes, controls, shortcuts, layouts, Bengali, offline use, `file://` use, credits/licences (Noto Sans Bengali OFL, edge-tts voice).
+- As built: README rewritten (features, shortcuts table, running locally, project layout, translating, credits). External links checked.
 
 ## Phase 9 – Timer presets — DONE, awaiting owner review
 - The 10/15/20 chips become user presets (label, minutes, optional layout to switch to). Edited in Settings; saved in `ct_prefs`.
