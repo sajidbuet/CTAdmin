@@ -21,6 +21,7 @@
   <script src="js/seatplan.js" defer></script>
   <script src="js/dial.js" defer></script>
   <script src="js/timer.js" defer></script>
+  <script src="js/layouts.js" defer></script>
   <script src="js/settings.js" defer></script>
   <script src="js/ui.js" defer></script>
   <script src="js/main.js" defer></script>
@@ -143,16 +144,17 @@
 
     <section id="planPanel" aria-label="Seat plan">
       <div class="plan-bar">
-        <label class="inline">Section
-          <select id="sectionSelect">
-            <option value="A">A (1‑65)</option><option value="B">B (66‑130)</option><option value="C">C (131‑195)</option>
-            <option value="A1">A1</option><option value="A2">A2</option>
-            <option value="B1">B1</option><option value="B2">B2</option>
-            <option value="C1">C1</option><option value="C2">C2</option>
-          </select>
+        <label class="inline">Layout
+          <select id="layoutSelect"></select>
         </label>
-        <button id="generateBtn" class="btn tool" title="Regenerate (reshuffles a random plan)"><span class="ico" aria-hidden="true">↻</span><span class="lbl">Regenerate</span></button>
+        <button id="generateBtn" class="btn tool" title="Reshuffle the random plan" hidden><span class="ico" aria-hidden="true">↻</span><span class="lbl">Reshuffle</span></button>
+        <button id="printBtn" class="btn tool" title="Print the seat plan"><span class="ico" aria-hidden="true">🖨</span><span class="lbl">Print</span></button>
+        <button id="pngBtn" class="btn tool" title="Download the seat plan as a PNG image"><span class="ico" aria-hidden="true">🖼</span><span class="lbl">PNG</span></button>
         <button id="planOptsBtn" class="btn tool" aria-haspopup="dialog"><span class="ico" aria-hidden="true">⚙️</span><span class="lbl">Layout options</span></button>
+      </div>
+      <div id="seatEditBar" class="edit-bar" role="status" hidden>
+        <span>Click seats to block or unblock them.</span>
+        <button id="seatEditDone" class="btn primary">Done</button>
       </div>
       <div id="planHolder"></div>
     </section>
@@ -238,6 +240,7 @@
 
     <section id="setPlan" aria-labelledby="hPlan">
       <h3 id="hPlan">Seat plan</h3>
+      <h4 class="sub">Numbering</h4>
       <label class="field">Start side
         <select id="startSide"><option value="left">Left</option><option value="right">Right</option></select>
       </label>
@@ -253,22 +256,39 @@
           <option value="random">Random</option>
         </select>
       </label>
-      <details class="custom">
-        <summary>Custom layout <small>(saved, not applied yet)</small></summary>
-        <label class="field">Use custom settings <input type="checkbox" id="useCustomSettings"></label>
-        <div id="customSettings" hidden>
-          <label class="field">Start roll <input type="number" id="customStartRoll" min="1"></label>
-          <label class="field">Student count <input type="number" id="customStudentCount" min="1"></label>
-          <label class="field">Section label <input type="text" id="customSectionLabel"></label>
-          <label class="field">Seat rows <input type="number" id="customSeatRows" min="1"></label>
-          <label class="field">Seat columns <input type="number" id="customSeatCols" min="1"></label>
+
+      <h4 class="sub">Layout</h4>
+      <div class="btn-row">
+        <button id="newLayoutBtn" class="btn tool">＋ New</button>
+        <button id="dupLayoutBtn" class="btn tool">⧉ Duplicate</button>
+        <button id="deleteLayoutBtn" class="btn tool">🗑 Delete</button>
+      </div>
+      <p id="layoutNote" class="note">Built-in layouts can’t be changed. Use <b>Duplicate</b> to make an editable copy.</p>
+      <fieldset id="layoutForm" class="plain">
+        <legend class="sr-only">Layout details</legend>
+        <label class="field">Preset name <input type="text" id="layoutName" maxlength="60"></label>
+        <label class="field">Title <input type="text" id="layoutLabel" maxlength="60" placeholder="e.g. Section A"></label>
+        <label class="field">First roll <input type="number" id="layoutStart" min="0" inputmode="numeric"></label>
+        <label class="field">Students <input type="number" id="layoutCount" min="1" max="1600" inputmode="numeric"></label>
+        <label class="field">Rows <input type="number" id="layoutRows" min="1" max="40" inputmode="numeric"></label>
+        <label class="field">Seats per row <input type="number" id="layoutCols" min="1" max="40" inputmode="numeric"></label>
+        <label class="field">Walkway after seat <input type="text" id="layoutWalkways" placeholder="e.g. 6 or 4, 8" inputmode="numeric"></label>
+        <label class="field">Leave every other seat empty <input type="checkbox" id="layoutSkip"></label>
+        <label class="field">Podium
+          <select id="layoutPodium"><option value="top">Top</option><option value="bottom">Bottom</option><option value="none">Hidden</option></select>
+        </label>
+        <div class="btn-row">
+          <button type="button" id="fitRowsBtn" class="btn tool">Fit rows to students</button>
+          <button type="button" id="editSeatsBtn" class="btn tool" aria-pressed="false">Block seats…</button>
+          <button type="button" id="clearBlockedBtn" class="btn tool">Clear blocked</button>
         </div>
-        <div class="settings-actions">
-          <button id="saveSettings" class="btn tool">💾 Save file</button>
-          <input type="file" id="loadSettings" accept=".json" hidden>
-          <button id="loadSettingsBtn" class="btn tool">📂 Load file</button>
-        </div>
-      </details>
+      </fieldset>
+      <p id="layoutStatus" class="layout-status" role="status"></p>
+      <div class="btn-row">
+        <button id="exportLayoutBtn" class="btn tool">💾 Export file</button>
+        <button id="importLayoutBtn" class="btn tool">📂 Import file</button>
+        <input type="file" id="importLayoutFile" accept=".json,application/json" hidden>
+      </div>
     </section>
 
     <section id="setKeys" aria-labelledby="hKeys">
@@ -281,7 +301,7 @@
         <dt><kbd>M</kbd></dt><dd>Mute / unmute</dd>
         <dt><kbd>F</kbd></dt><dd>Fullscreen</dd>
         <dt><kbd>P</kbd></dt><dd>Projection mode</dd>
-        <dt><kbd>Esc</kbd></dt><dd>Exit projection / close this panel</dd>
+        <dt><kbd>Esc</kbd></dt><dd>Exit projection or seat blocking / close this panel</dd>
       </dl>
     </section>
   </div>

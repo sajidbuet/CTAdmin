@@ -1,4 +1,4 @@
-/* CTAdmin – settings drawer: Display, Sound, Seat plan (+ custom layout, applied in Phase 3), shortcuts */
+/* CTAdmin – settings drawer: open/close, Display and Sound (seat plan fields: seatplan.js, layouts.js) */
 const drawer = $id('settingsDrawer');
 let drawerOpener = null;
 
@@ -46,56 +46,7 @@ document.querySelectorAll('[data-cue]').forEach(cb => {
 });
 $id('testSound').addEventListener('click', () => Snd.test());
 
-/* ---- Seat plan: custom layout (stored only; the plan uses it from Phase 3) ---- */
-const useCustom     = $id('useCustomSettings');
-const customSection = $id('customSettings');
-const inpStart = $id('customStartRoll'), inpCount = $id('customStudentCount'), inpLabel = $id('customSectionLabel'),
-      inpRows  = $id('customSeatRows'),  inpCols  = $id('customSeatCols');
-const fileLoadInput = $id('loadSettings');
-const LS_KEY = 'ctadmin_customSettings';
-
-const getSettingsObject = () => ({
-  useCustom: useCustom.checked, startRoll: +inpStart.value, studentCount: +inpCount.value,
-  sectionLabel: inpLabel.value, seatRows: +inpRows.value, seatCols: +inpCols.value,
-});
-function applySettingsObject(d) {
-  useCustom.checked = !!d.useCustom;
-  inpStart.value = d.startRoll    || inpStart.value;
-  inpCount.value = d.studentCount || inpCount.value;
-  inpLabel.value = d.sectionLabel || inpLabel.value;
-  inpRows.value  = d.seatRows     || inpRows.value;
-  inpCols.value  = d.seatCols     || inpCols.value;
-  customSection.hidden = !useCustom.checked;
-}
-const saveSettingsToStorage = () => { try { localStorage.setItem(LS_KEY, JSON.stringify(getSettingsObject())); } catch { /* blocked */ } };
-function loadSettingsFromStorage() {
-  try { const raw = localStorage.getItem(LS_KEY); if (raw) applySettingsObject(JSON.parse(raw)); }
-  catch { console.warn('Failed to read saved custom settings'); }
-}
-useCustom.addEventListener('change', () => { customSection.hidden = !useCustom.checked; saveSettingsToStorage(); });
-[inpStart, inpCount, inpLabel, inpRows, inpCols].forEach(el => el.addEventListener('input', saveSettingsToStorage));
-
-$id('saveSettings').addEventListener('click', () => {
-  const url = URL.createObjectURL(new Blob([JSON.stringify(getSettingsObject(), null, 2)], { type: 'application/json' }));
-  const a = Object.assign(document.createElement('a'), { href: url, download: 'ctadmin-settings.json' });
-  a.click();
-  URL.revokeObjectURL(url);
-});
-$id('loadSettingsBtn').addEventListener('click', () => fileLoadInput.click());
-fileLoadInput.addEventListener('change', e => {
-  const file = e.target.files[0];
-  if (!file) return;
-  const reader = new FileReader();
-  reader.onload = () => {
-    try { applySettingsObject(JSON.parse(reader.result)); saveSettingsToStorage(); }
-    catch { alert('Invalid settings file'); }
-  };
-  reader.readAsText(file);
-  fileLoadInput.value = '';
-});
-
 /* ---- restore ---- */
 applyTheme();
 applyScale(prefs.scale || '1');
 setProjLayout(prefs.proj || 'auto');
-loadSettingsFromStorage();

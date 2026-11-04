@@ -30,6 +30,7 @@ body.dark-theme {
 }
 
 * { box-sizing: border-box; }
+[hidden] { display: none !important; }
 html { -webkit-text-size-adjust: 100%; font-size: calc(100% * var(--scale, 1)); }
 body {
   margin: 0;
@@ -160,9 +161,13 @@ body.hide-timer #stage, body.hide-plan #stage { grid-template-columns: minmax(0,
 .run-row { display: grid; grid-template-columns: minmax(0, 2fr) minmax(0, 1fr) auto; gap: .5rem; width: 100%; }
 .run-row .btn { min-height: 56px; font-size: 1.1rem; }
 .run-row .btn[data-mute] { width: 56px; }
+@media (max-width: 400px) {
+  .run-row { grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr) auto; }
+  .run-row .btn { padding-inline: .5rem; }
+}
 
 /* ───────── Seat plan ───────── */
-#planPanel { min-width: 0; }
+#planPanel { min-width: 0; display: flex; flex-direction: column; }
 .plan-bar {
   display: flex; flex-wrap: wrap; align-items: center; gap: .5rem;
   background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius);
@@ -172,30 +177,37 @@ body.hide-timer #stage, body.hide-plan #stage { grid-template-columns: minmax(0,
 
 #planHolder { container-type: inline-size; min-width: 0; overflow-x: auto; }
 .plan-container {
-  --cols: 12; --rows: 6;
-  --seat: max(34px, min(calc(100cqw / (var(--cols) + 1.6)), 72px));
+  --units: 12; --rows: 6; --fs: .4;
+  --seat: max(34px, min(calc(100cqw / (var(--units) + 1)), 72px));
+  --aisle: calc(var(--seat) * .6);
   display: flex; flex-direction: column; align-items: center;
 }
-.plan-container h1 { margin: .2rem 0 .5rem; font-size: 1.3rem; text-align: center; }
+.plan-container h1 { margin: .2rem 0 0; font-size: 1.3rem; text-align: center; }
+.plan-sub { margin: .1rem 0 .5rem; color: var(--muted); font-size: .9rem; text-align: center; }
+.plan-warn { margin: 0 0 .6rem; padding: .35rem .7rem; border-radius: 8px; font-weight: 600; color: var(--danger); background: color-mix(in srgb, var(--danger) 12%, var(--surface)); }
 .podium {
   width: min(60%, 420px); height: 12px; margin-bottom: .4rem;
   border-radius: 6px; background: var(--pri); opacity: .85;
 }
-.plan-container table { border-collapse: separate; border-spacing: 0 calc(var(--seat) * .12); margin: 0 auto; table-layout: fixed; }
-td.seat {
+.podium-bottom .podium { order: 10; margin: .5rem 0 0; }
+.podium-none .podium { display: none; }
+.plan-grid { display: grid; row-gap: calc(var(--seat) * .12); justify-content: center; }
+.seat {
   width: var(--seat);
   height: calc(var(--seat) * .98);
+  margin: 0;
   padding: calc(var(--seat) * .05) 0 0;
   border: 1px solid color-mix(in srgb, var(--txt) 55%, transparent);
   border-radius: calc(var(--seat) * .09);
   background: var(--surface);
+  color: var(--txt);
+  font: inherit;
   text-align: center;
-  vertical-align: top;
   line-height: 1;
 }
-.seat-num { display: block; font-weight: 700; font-size: calc(var(--seat) * .4); font-variant-numeric: tabular-nums; }
+.seat-num { display: block; font-weight: 700; font-size: calc(var(--seat) * var(--fs)); font-variant-numeric: tabular-nums; white-space: nowrap; }
 .chair {
-  position: relative;
+  display: block; position: relative;
   width: 58%; height: 26%;
   margin: calc(var(--seat) * .06) auto 0;
   background: color-mix(in srgb, var(--txt) 45%, var(--surface));
@@ -207,7 +219,22 @@ td.seat {
 }
 .chair::before { left: 8%; }
 .chair::after  { right: 8%; }
-td.walkway { width: calc(var(--seat) * .6); border: none; background: transparent; }
+.seat.blocked {
+  background: repeating-linear-gradient(135deg, transparent 0 5px, color-mix(in srgb, var(--txt) 14%, transparent) 5px 7px), var(--surface);
+  color: var(--muted);
+}
+.seat .x { display: block; padding-top: calc(var(--seat) * .2); font-size: calc(var(--seat) * .35); }
+
+/* blocked-seat editing */
+.edit-bar {
+  display: flex; align-items: center; justify-content: space-between; gap: .8rem; flex-wrap: wrap;
+  margin: 0 0 1rem; padding: .5rem .6rem .5rem 1rem; border-radius: var(--radius);
+  background: color-mix(in srgb, var(--pri) 12%, var(--surface)); border: 1px solid var(--pri); font-weight: 600;
+}
+body.edit-seats button.seat:not(:disabled) { cursor: pointer; }
+body.edit-seats button.seat:not(:disabled):hover { box-shadow: inset 0 0 0 2px var(--pri); }
+body.edit-seats button.seat:focus-visible { outline: 3px solid color-mix(in srgb, var(--pri) 60%, transparent); outline-offset: 1px; position: relative; z-index: 1; }
+body.edit-seats button.seat:disabled { opacity: .35; }
 
 /* ───────── Dialogs: settings drawer & license ───────── */
 dialog { color: var(--txt); background: var(--surface); border: none; padding: 0; }
@@ -239,13 +266,16 @@ dialog.drawer[open] { animation: drawerIn .2s ease-out; }
 .cues { border: 1px solid var(--line); border-radius: 10px; margin: .6rem 0 .8rem; padding: .3rem .9rem .5rem; display: grid; grid-template-columns: repeat(auto-fit, minmax(9.5rem, 1fr)); }
 .cues legend { padding: 0 .3rem; font-size: .9rem; color: var(--muted); }
 .cues label.check { min-height: var(--tap); }
-details.custom { margin-top: .6rem; }
-details.custom summary { cursor: pointer; min-height: var(--tap); display: flex; align-items: center; gap: .4rem; font-weight: 600; }
-details.custom summary small { font-weight: 400; color: var(--muted); }
-details.custom summary::-webkit-details-marker { display: none; }
-details.custom summary::before { content: "▸"; color: var(--muted); }
-details.custom[open] summary::before { content: "▾"; }
-.settings-actions { margin-top: .6rem; display: flex; gap: .5rem; justify-content: flex-end; }
+.drawer-body h4.sub { margin: 1rem 0 .2rem; font-size: .95rem; }
+.btn-row { display: flex; flex-wrap: wrap; gap: .4rem; margin: .5rem 0; }
+.btn-row .btn { font-weight: 500; }
+.note { margin: .4rem 0; padding: .5rem .7rem; border-radius: 8px; font-size: .9rem; background: color-mix(in srgb, var(--txt) 6%, var(--surface)); }
+fieldset.plain { border: none; margin: 0; padding: 0; min-width: 0; }
+fieldset.plain:disabled .field { opacity: .55; cursor: default; }
+.layout-status { margin: .5rem 0; font-size: .9rem; font-weight: 600; }
+.layout-status.ok  { color: var(--ok); }
+.layout-status.err { color: var(--danger); }
+body.dark-theme .layout-status.ok { color: #6fd08f; }
 .keys { display: grid; grid-template-columns: max-content 1fr; gap: .45rem 1rem; margin: 0; align-items: center; }
 .keys dt { white-space: nowrap; }
 .keys dd { margin: 0; color: var(--muted); }
@@ -278,7 +308,7 @@ dialog.modal h2 { margin-bottom: .8rem; }
   .actions { flex-wrap: nowrap; }
   #stage { padding: .6rem; padding-bottom: calc(var(--tap) + 1.4rem + env(safe-area-inset-bottom)); }
   body[data-tab="timer"] #planPanel, body[data-tab="plan"] #timerBox { display: none; }
-  body.hide-timer #planPanel, body.hide-plan #timerBox { display: block; }
+  body.hide-timer #planPanel, body.hide-plan #timerBox { display: flex; }
   #tabBar {
     display: flex; position: fixed; left: 0; right: 0; bottom: 0; z-index: 60;
     background: var(--surface); border-top: 1px solid var(--line);
@@ -290,6 +320,32 @@ dialog.modal h2 { margin-bottom: .8rem; }
   }
   #tabBar button.active { color: var(--pri); box-shadow: inset 0 3px 0 var(--pri); }
   .page-footer { display: none; }
+}
+
+/* ───────── Fit to screen (setup mode): side-by-side desktop or one tab on phones; no page scrolling.
+   The dial takes whatever height the controls leave; seats are sized by width and height. ───────── */
+@media (min-width: 900px) and (min-height: 480px), (max-width: 700px) and (min-height: 480px) {
+  body:not(.mode-projection) .app { height: 100dvh; min-height: 0; }
+  body:not(.mode-projection) #stage { min-height: 0; align-items: stretch; grid-template-rows: minmax(0, 1fr); }
+  body:not(.mode-projection) #timerBox { min-height: 0; overflow-y: auto; }
+  body:not(.mode-projection) #pie { flex: 1 1 0; min-height: 110px; width: 100%; height: 100%; max-width: none; }
+  body:not(.mode-projection) .clock, body:not(.mode-projection) .timer-controls { flex: none; }
+  body:not(.mode-projection) #planHolder { flex: 1; min-height: 0; container-type: size; overflow: auto; }
+  body:not(.mode-projection) .plan-container {
+    --head: 5.8rem;
+    --seat: max(26px, min(calc(100cqw / (var(--units) + 1)), calc((100cqh - var(--head)) / (var(--rows) * 1.12)), 72px));
+  }
+  body:not(.mode-projection) .plan-container.has-warn { --head: 8.8rem; }
+  body:not(.mode-projection) .plan-bar { flex: none; margin-bottom: .6rem; }
+  body:not(.mode-projection) .edit-bar { flex: none; margin-bottom: .6rem; }
+  .page-footer { padding: .3rem 1rem; font-size: .75rem; }
+}
+@media (min-width: 900px) and (min-height: 480px) and (max-height: 760px) {
+  #stage { padding: .6rem; gap: .6rem; }
+  #timerBox { padding: .6rem; gap: .4rem; }
+  .timer-controls { gap: .45rem; }
+  .run-row .btn { min-height: var(--tap); }
+  #endTime { min-height: 1.2em; }
 }
 
 /* ───────── Projection mode ───────── */
@@ -316,9 +372,11 @@ body.mode-projection #planPanel { flex-direction: column; }
 body.mode-projection #planHolder { container-type: size; flex: 1; min-height: 0; overflow: hidden; }
 body.mode-projection .plan-container {
   height: 100cqh; justify-content: center;
-  --seat: min(calc(100cqw / (var(--cols) + 1.6)), calc((100cqh - 15cqh) / (var(--rows) * 1.16)));
+  --seat: min(calc(100cqw / (var(--units) + 1)), calc((100cqh - 18cqh) / (var(--rows) * 1.12)));
 }
-body.mode-projection .plan-container h1 { font-size: 5.5cqh; margin: 0 0 1cqh; }
+body.mode-projection .plan-container h1 { font-size: 5.5cqh; margin: 0; }
+body.mode-projection .plan-sub { font-size: 2.6cqh; margin: .3cqh 0 1cqh; }
+body.mode-projection .edit-bar { display: none; }
 body.mode-projection .podium { height: 1.6cqh; margin-bottom: 1cqh; }
 
 /* auto layout by screen shape: wide → side by side; squarish/portrait → stacked */
@@ -353,3 +411,17 @@ body.mode-projection #projBar {
 #projBar .armed .lbl { display: inline; }
 body.mode-projection.idle #projBar { opacity: 0; pointer-events: none; }
 body.mode-projection.idle { cursor: none; }
+
+/* ───────── Print: seat plan only ───────── */
+@media print {
+  :root, body.dark-theme { --bg: #fff; --surface: #fff; --txt: #000; --muted: #444; --pri: #AC1F24; }
+  @page { size: landscape; margin: 10mm; }
+  body { background: #fff; }
+  .topbar, .page-footer, #timerBox, .plan-bar, .edit-bar, #tabBar, #projBar, dialog { display: none !important; }
+  #stage { display: block; padding: 0; }
+  #planPanel { display: block !important; }
+  #planHolder { overflow: visible; container-type: normal; }
+  .plan-container { --seat: min(calc(260mm / (var(--units) + 1)), calc(150mm / (var(--rows) * 1.12)), 24mm); }
+  .plan-container h1 { font-size: 18pt; }
+  .seat, .podium { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+}

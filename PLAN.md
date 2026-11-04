@@ -20,10 +20,11 @@ Decisions: restyle/modernize, keep the #AC1F24 accent (assumed from "AC1f24"; co
 - Shortcuts: Space, R, M, F, P, arrows. 44px touch targets, ARIA labels.
 - As built: single Start/Pause/Resume button; Reset needs a second press within 3 s while a test is running or paused; theme and seat-plan options (except Section) moved into the drawer; "scale" = interface size (90–130 %); per-cue on/off and speaker test; volume, pre-count, cues, duration and plan options persisted in `ct_prefs`; settings and license use native `<dialog>`.
 
-## Phase 3 – Customizable bench layout
+## Phase 3 – Customizable bench layout — DONE, awaiting owner review
 - Layout model: rows, cols, startRoll, count, label, walkway column indexes, skipAlternate, pattern, startSide, startRow.
 - Existing sections become presets; custom presets saved/loaded (JSON). Grid-based seat sizing fitted to viewport.
 - Validate rows × cols ≥ count. Optional: blocked seats, podium position, print/PNG export.
+- As built: Section picker became a Layout picker (built-in A…C2 plus “My layouts”); editor in Settings → Seat plan (name, title, first roll, students, rows, seats per row, walkways, alternate-seat spacing, podium top/bottom/hidden, “Fit rows to students”); built-ins are read-only, Duplicate to edit; click-to-block seats; capacity check with on-plan warning; JSON export/import (also reads the old custom-settings file); old custom settings migrated once; random plans use a saved seed so they survive reloads (Reshuffle makes a new one); CSS-grid rendering; Print (seat plan only, landscape); PNG download (canvas-drawn, 2× resolution, light colours regardless of theme). Setup mode now fits the window height (dial shrinks to the space left by the controls; seats sized by width and height) on desktop ≥900 px wide and on phones; below 480 px tall it scrolls as before. Start side / start row / pattern stay plan-wide rather than per layout, but are included in exported files.
 
 ## Phase 4 – Bengali (i18n)
 - `docs/i18n/{en,bn}.json`, language toggle, persisted. Bengali numerals option for timer and roll numbers.
