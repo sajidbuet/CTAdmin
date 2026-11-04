@@ -1,133 +1,185 @@
-/* CTAdmin – countdown timer, clock, pre-count, persistence */
-let duration = 1200, initialDuration = 1200, remain = 1200, endTime = null, running = false;
+/* CTAdmin – countdown timer, clock, pre-count, persistence
+   States: idle → (starting: pre-count) → running ⇄ paused → done.  `duration` is the configured length;
+   `initialDuration` is the full length of the current run (grows if time is added). */
+const MIN_DUR = 30, MAX_DUR = 180 * 60;
+const clampDur = s => Math.min(MAX_DUR, Math.max(MIN_DUR, Math.round(s)));
 
-const precountToggle = document.getElementById('precountToggle');
-const dateLbl = document.getElementById('dateTime'), endLbl = document.getElementById('endTime');
-const durInput = document.getElementById('durationInput');
-const durInc = document.getElementById('durInc'), durDec = document.getElementById('durDec');
+let duration = clampDur(prefs.duration || 1200), initialDuration = duration, remain = duration,
+    endTime = null, running = false, paused = false, starting = false, resetArmed = null;
+
+const precountToggle = $id('precountToggle');
+const dateLbl = $id('dateTime'), endLbl = $id('endTime');
+const durInput = $id('durationInput'), durInc = $id('durInc'), durDec = $id('durDec');
 const quickBtns = document.querySelectorAll('button.quick');
-const startBtn = document.getElementById('startBtn'), pauseBtn = document.getElementById('pauseBtn'),
-      resetBtn = document.getElementById('resetBtn');
+const playBtns  = document.querySelectorAll('[data-action="play"]');
+const resetBtns = document.querySelectorAll('[data-action="reset"]');
+const srStatus  = $id('srStatus');
 
 const fmt = t => `${pad((t / 60) | 0)}:${pad(t % 60)}`;
+const timerStatus = () => running ? 'running' : paused ? 'paused' : starting ? 'starting' : remain === 0 ? 'done' : 'idle';
 
 function drawPie() {
   fill.style.strokeDashoffset = (FULL_LEN * (1 - remain / initialDuration)).toFixed(1);
   timeLabel_text.textContent = fmt(remain);
+  pie.setAttribute('aria-label', `Time remaining ${fmt(remain)}`);
 }
-const updateEndLabel = () => {
-  endLbl.textContent = endTime ? `Ends at ${endTime.toLocaleTimeString()}` : '_';
-};
+function updateEndLabel() {
+  const st = timerStatus();
+  endLbl.textContent =
+    st === 'paused'  ? 'Paused' :
+    st === 'done'    ? `Ended at ${endTime ? endTime.toLocaleTimeString() : ''}` :
+    endTime          ? `Ends at ${endTime.toLocaleTimeString()}` : ' ';
+}
 
 /* ---------- persistence ---------- */
 const TIMER_KEY = 'ct_timerState';
-const saveTimerState  = obj => localStorage.setItem(TIMER_KEY, JSON.stringify(obj));
-const clearTimerState = () => localStorage.removeItem(TIMER_KEY);
+const saveTimerState  = obj => { try { localStorage.setItem(TIMER_KEY, JSON.stringify(obj)); } catch { /* blocked */ } };
+const clearTimerState = () => { try { localStorage.removeItem(TIMER_KEY); } catch { /* blocked */ } };
 function loadTimerState() { try { return JSON.parse(localStorage.getItem(TIMER_KEY)); } catch { return null; } }
+const saveRunning = () => saveTimerState({ status: 'running', end: endTime.getTime(), initial: initialDuration });
+const savePaused  = () => saveTimerState({ status: 'paused', remaining: remain, initial: initialDuration });
 
 function restoreTimer() {
   const st = loadTimerState();
-  if (!st) return;
-  if (st.status === 'running') {
+  if (st && st.status === 'running') {
     const rem = Math.max(0, Math.ceil((st.end - Date.now()) / 1000));
     if (rem > 0) {
-      duration = initialDuration = st.initial || rem;
+      initialDuration = Math.max(st.initial || rem, rem);
       remain = rem;
       endTime = new Date(Date.now() + rem * 1000);
       running = true;
-      lockDurationControls(true);
-      startBtn.disabled = true; pauseBtn.disabled = false; resetBtn.disabled = false;
     } else clearTimerState();
-  } else if (st.status === 'paused') {
-    duration = initialDuration = st.initial || st.remaining;
+  } else if (st && st.status === 'paused' && st.remaining > 0) {
+    initialDuration = Math.max(st.initial || st.remaining, st.remaining);
     remain = st.remaining;
-    running = false;
-    pauseBtn.textContent = 'Resume';
-    resetBtn.disabled = false;
+    paused = true;
   }
-  updateEndLabel(); drawPie(); updateQuickControls();
+  durInput.value = +(duration / 60).toFixed(2);
+  updateEndLabel(); drawPie(); syncButtons();
 }
 
-/* ---------- controls ---------- */
-async function startWithPrecount() {
-  if (running) return;
-  if (precountToggle.checked) {
-    timeLabel_text.style.visibility = 'hidden';
-    await runPrecount();
-    timeLabel_text.style.visibility = '';
-  }
-  startTimer();
-}
-
-function startTimer() {
-  if (running) return;
-  duration = (+durInput.value || 10) * 60;
-  initialDuration = remain = duration;
-  endTime = new Date(Date.now() + remain * 1000);
-  updateEndLabel();
-  saveTimerState({ status: 'running', end: endTime.getTime(), initial: initialDuration });
-  running = true;
-  startBtn.disabled = true; pauseBtn.disabled = false; resetBtn.disabled = false;
+/* ---------- duration (only while idle / done) ---------- */
+function setDuration(sec) {
+  if (running || paused || starting) return;
+  duration = initialDuration = remain = clampDur(sec);
+  durInput.value = +(duration / 60).toFixed(2);
+  prefs.duration = duration; savePrefs();
+  endTime = null;
   pie.classList.remove('shake');
-  drawPie();
-  Snd.start();
-  lockDurationControls(true);
-  updateQuickControls();
+  updateEndLabel(); drawPie(); syncButtons();
 }
 
-function pauseTimer() {
-  if (!running) {                       // resume
-    if (remain <= 0) return;
-    endTime = new Date(Date.now() + remain * 1000);
-    running = true; pauseBtn.textContent = 'Pause';
-    saveTimerState({ status: 'running', end: endTime.getTime(), initial: initialDuration });
-  } else {                              // pause
-    running = false; pauseBtn.textContent = 'Resume';
-    saveTimerState({ status: 'paused', remaining: remain, initial: initialDuration });
-  }
-  updateQuickControls();
-}
-
-function resetTimer() {
-  running = false;
-  clearTimerState();
-  duration = (+durInput.value || 10) * 60;
-  initialDuration = remain = duration;
-  endTime = null; drawPie(); updateEndLabel();
-  pie.classList.remove('shake');
-  startBtn.disabled = false; pauseBtn.disabled = true; resetBtn.disabled = true;
-  pauseBtn.textContent = 'Pause';
-  lockDurationControls(false);
-  updateQuickControls();
-}
-
+/* +/- time: changes the running/paused countdown, or the configured duration when idle */
 function adjust(sec) {
   if (running) {
-    remain = Math.max(0, remain + sec);
+    remain = Math.min(MAX_DUR, Math.max(1, remain + sec));
+    initialDuration = Math.max(initialDuration, remain);
     endTime = new Date(Date.now() + remain * 1000);
-    saveTimerState({ status: 'running', end: endTime.getTime(), initial: initialDuration });
-  } else {
-    duration = Math.max(0, duration + sec);
-    initialDuration = remain = duration;
-    durInput.value = Math.ceil(duration / 60);
+    saveRunning();
+  } else if (paused) {
+    remain = Math.min(MAX_DUR, Math.max(1, remain + sec));
+    initialDuration = Math.max(initialDuration, remain);
+    savePaused();
+  } else if (!starting) {
+    return setDuration(duration + sec);
   }
   updateEndLabel(); drawPie();
 }
 
-function finish() {
-  running = false; remain = 0; drawPie(); updateEndLabel();
+/* ---------- run controls ---------- */
+async function startTimer() {
+  if (running || paused || starting) return;
+  starting = true; syncButtons();
+  if (precountToggle.checked) await runPrecount();
+  starting = false;
+  initialDuration = remain = duration;
+  endTime = new Date(Date.now() + remain * 1000);
+  running = true;
+  saveRunning();
+  pie.classList.remove('shake');
+  updateEndLabel(); drawPie(); syncButtons();
+  Snd.start();
+}
+
+function togglePause() {
+  if (running) {
+    running = false; paused = true;
+    savePaused();
+  } else if (paused) {
+    endTime = new Date(Date.now() + remain * 1000);
+    running = true; paused = false;
+    saveRunning();
+  }
+  updateEndLabel(); syncButtons();
+}
+
+const playPause = () => (running || paused ? togglePause() : startTimer());
+
+/* Reset while a test is in progress needs a second press within 3 s. */
+function requestReset() {
+  if (starting) return;
+  if ((!running && !paused) || resetArmed) return resetTimer();
+  resetArmed = setTimeout(() => { resetArmed = null; syncButtons(); }, 3000);
+  syncButtons();
+}
+
+function resetTimer() {
+  clearTimeout(resetArmed); resetArmed = null;
+  running = paused = false;
   clearTimerState();
+  initialDuration = remain = duration;
+  endTime = null;
+  pie.classList.remove('shake');
+  drawPie(); updateEndLabel(); syncButtons();
+}
+
+function finish() {
+  running = paused = false; remain = 0;
+  clearTimeout(resetArmed); resetArmed = null;
+  clearTimerState();
+  drawPie(); updateEndLabel();
   pie.classList.add('shake');
-  startBtn.disabled = false; pauseBtn.disabled = true; resetBtn.disabled = false;
-  pauseBtn.textContent = 'Pause';
+  syncButtons();
   Snd.end();
-  lockDurationControls(false);
-  updateQuickControls();
 }
 
 function playWarningSounds() {
   if (remain === 300) Snd.fiveMin();
   if (remain === 60)  Snd.lastMinute();
+}
+
+/* ---------- button state (main card + projection bar) ---------- */
+const PLAY_UI = {
+  idle:     ['▶', 'Start',  'go'],
+  starting: ['▶', 'Starting…', 'go'],
+  running:  ['⏸', 'Pause',  'warn'],
+  paused:   ['▶', 'Resume', 'go'],
+  done:     ['▶', 'Restart', 'go'],
+};
+const STATUS_TEXT = { idle: 'Timer ready', starting: 'Starting', running: 'Timer running', paused: 'Timer paused', done: 'Time is up' };
+let lastStatus = null;
+
+function syncButtons() {
+  const st = timerStatus();
+  body.dataset.timer = st;
+  const [ico, lbl, cls] = PLAY_UI[st];
+  playBtns.forEach(b => {
+    b.querySelector('.ico').textContent = ico;
+    b.querySelector('.lbl').textContent = lbl;
+    b.classList.remove('go', 'warn'); b.classList.add(cls);
+    b.disabled = st === 'starting';
+    b.setAttribute('aria-label', `${lbl} timer`);
+  });
+  resetBtns.forEach(b => {
+    b.disabled = st === 'idle' || st === 'starting';
+    b.classList.toggle('armed', !!resetArmed);
+    b.querySelector('.lbl').textContent = resetArmed ? 'Confirm?' : 'Reset';
+    b.setAttribute('aria-label', resetArmed ? 'Press again to confirm reset' : 'Reset timer');
+  });
+  const lock = st === 'running' || st === 'paused' || st === 'starting';
+  durInput.disabled = durInc.disabled = durDec.disabled = lock;
+  quickBtns.forEach(b => b.disabled = lock);
+  if (st !== lastStatus) { srStatus.textContent = STATUS_TEXT[st]; lastStatus = st; }
 }
 
 /* ---------- 3-2-1 pre-count ---------- */
@@ -164,25 +216,15 @@ function tick() {
   setTimeout(tick, 1000 - now.getMilliseconds());
 }
 
-/* ---------- duration inputs & quick controls ---------- */
-function lockDurationControls(lock = true) {
-  durInput.disabled = durInc.disabled = durDec.disabled = lock;
-  quickBtns.forEach(b => b.disabled = lock);
-}
+/* ---------- wiring ---------- */
+quickBtns.forEach(b => b.addEventListener('click', () => setDuration(b.dataset.min * 60)));
+document.querySelectorAll('button.adj').forEach(b => b.addEventListener('click', () => adjust(parseInt(b.dataset.sec, 10))));
+durInc.addEventListener('click', () => setDuration(duration + 60));
+durDec.addEventListener('click', () => setDuration(duration - 60));
+durInput.addEventListener('change', () => setDuration((parseFloat(durInput.value) || duration / 60) * 60));
+playBtns.forEach(b => b.addEventListener('click', playPause));
+resetBtns.forEach(b => b.addEventListener('click', requestReset));
 
-/* other UI (projection bar) listens for this */
-function updateQuickControls() { document.dispatchEvent(new Event('timerstate')); }
-
-quickBtns.forEach(b => b.onclick = () => {
-  durInput.value = b.dataset.min;
-  timeLabel_text.textContent = fmt(b.dataset.min * 60);
-  updateEndLabel();
-});
-document.querySelectorAll('button.adj').forEach(b => b.onclick = () => adjust(parseInt(b.dataset.sec, 10)));
-durInc.addEventListener('click', () => { durInput.value = Math.max(1, parseInt(durInput.value, 10) + 1); resetTimer(); });
-durDec.addEventListener('click', () => { durInput.value = Math.max(1, parseInt(durInput.value, 10) - 1); resetTimer(); });
-durInput.addEventListener('change', () => { durInput.value = Math.max(1, parseInt(durInput.value, 10) || 1); resetTimer(); });
-
-startBtn.onclick = startWithPrecount;
-pauseBtn.onclick = pauseTimer;
-resetBtn.onclick = resetTimer;
+prefs.precount = prefs.precount ?? true;
+precountToggle.checked = prefs.precount;
+precountToggle.addEventListener('change', () => { prefs.precount = precountToggle.checked; savePrefs(); });

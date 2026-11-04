@@ -16,6 +16,7 @@
   <audio id="lastminute" src="audio/lastminute.mp3" preload="auto"></audio>
   <audio id="ticksound" src="audio/tick.mp3" preload="auto"></audio>
 
+  <script src="js/state.js" defer></script>
   <script src="js/audio.js" defer></script>
   <script src="js/seatplan.js" defer></script>
   <script src="js/dial.js" defer></script>
@@ -84,10 +85,9 @@
     <nav class="actions" aria-label="View">
       <button id="toggleTimerBtn" class="btn tool" aria-pressed="true" title="Show/hide timer"><span class="ico">⏱</span><span class="lbl">Timer</span></button>
       <button id="togglePlanBtn" class="btn tool" aria-pressed="true" title="Show/hide seat plan"><span class="ico">🪑</span><span class="lbl">Plan</span></button>
-      <button id="themeToggle" class="btn tool" title="Light / dark theme"><span class="ico">🌙</span><span class="lbl">Theme</span></button>
-      <button id="fsToggle" class="btn tool" title="Fullscreen (F)"><span class="ico">⛶</span><span class="lbl">Fullscreen</span></button>
-      <button id="settingsGear" class="btn tool" title="Settings"><span class="ico">⚙️</span><span class="lbl">Settings</span></button>
-      <button id="projBtn" class="btn primary" title="Projection mode (P)"><span class="ico">📽</span><span class="lbl">Project</span></button>
+      <button id="fsToggle" class="btn tool" title="Fullscreen (F)" aria-label="Fullscreen"><span class="ico" aria-hidden="true">⛶</span><span class="lbl">Fullscreen</span></button>
+      <button id="settingsGear" class="btn tool" title="Settings" aria-label="Settings" aria-haspopup="dialog"><span class="ico" aria-hidden="true">⚙️</span><span class="lbl">Settings</span></button>
+      <button id="projBtn" class="btn primary" title="Projection mode (P)" aria-label="Projection mode"><span class="ico" aria-hidden="true">📽</span><span class="lbl">Project</span></button>
     </nav>
   </header>
 
@@ -111,71 +111,49 @@
       </div>
 
       <div class="timer-controls">
-        <div class="duration-row">
-          <label for="durationInput">Minutes</label>
+        <div class="duration-row" role="group" aria-label="Test duration">
           <div class="stepper">
-            <button type="button" id="durDec" class="btn tool" aria-label="Decrease duration">−</button>
-            <input id="durationInput" type="number" min="1" max="180" step="1" value="20" inputmode="numeric">
-            <button type="button" id="durInc" class="btn tool" aria-label="Increase duration">+</button>
+            <button type="button" id="durDec" class="btn tool" aria-label="One minute shorter">−</button>
+            <input id="durationInput" type="number" min="0.5" max="180" step="any" value="20" inputmode="decimal" aria-label="Duration in minutes">
+            <button type="button" id="durInc" class="btn tool" aria-label="One minute longer">+</button>
           </div>
+          <span class="unit" aria-hidden="true">min</span>
           <div class="chips">
-            <button class="quick btn chip" data-min="10">10</button>
-            <button class="quick btn chip" data-min="15">15</button>
-            <button class="quick btn chip" data-min="20">20</button>
+            <button class="quick btn chip" data-min="10" aria-label="Set 10 minutes">10</button>
+            <button class="quick btn chip" data-min="15" aria-label="Set 15 minutes">15</button>
+            <button class="quick btn chip" data-min="20" aria-label="Set 20 minutes">20</button>
           </div>
         </div>
 
-        <div class="chips adjust-row">
-          <button class="adj btn chip" data-sec="-60">−1 min</button>
-          <button class="adj btn chip" data-sec="60">+1 min</button>
+        <div class="chips adjust-row" role="group" aria-label="Adjust time">
+          <button class="adj btn chip" data-sec="-60" title="Arrow Down">−1 min</button>
+          <button class="adj btn chip" data-sec="60"  title="Arrow Up">+1 min</button>
           <button class="adj btn chip" data-sec="300">+5 min</button>
-          <button class="adj btn chip" data-sec="30">+30 s</button>
+          <button class="adj btn chip" data-sec="30"  title="Arrow Right">+30 s</button>
         </div>
 
         <div class="run-row">
-          <button id="startBtn" class="btn go">Start</button>
-          <button id="pauseBtn" class="btn warn" disabled>Pause</button>
-          <button id="resetBtn" class="btn stop" disabled>Reset</button>
-        </div>
-
-        <div class="sound-row">
-          <button id="volumeIcon" class="btn tool" aria-label="Mute / unmute">🔉</button>
-          <input type="range" id="volumeSlider" min="0" max="1" step="0.01" value="1" title="Audio volume" aria-label="Volume">
-          <label class="check"><input type="checkbox" id="precountToggle" checked> 3-2-1 pre-count</label>
+          <button id="playBtn" data-action="play" class="btn go" title="Start / pause (Space)"><span class="ico" aria-hidden="true">▶</span><span class="lbl">Start</span></button>
+          <button id="resetBtn" data-action="reset" class="btn stop" title="Reset (R)" disabled><span class="ico" aria-hidden="true">↺</span><span class="lbl">Reset</span></button>
+          <button id="volumeIcon" data-mute class="btn tool" title="Mute (M)" aria-label="Mute" aria-pressed="false">🔉</button>
         </div>
       </div>
+      <div id="srStatus" class="sr-only" role="status" aria-live="polite"></div>
     </section>
 
     <section id="planPanel" aria-label="Seat plan">
-      <details id="planOptions" class="plan-options" open>
-        <summary>Seat plan options</summary>
-        <div class="opt-grid">
-          <label>Section
-            <select id="sectionSelect">
-              <option value="A">A (1‑65)</option><option value="B">B (66‑130)</option><option value="C">C (131‑195)</option>
-              <option value="A1">A1</option><option value="A2">A2</option>
-              <option value="B1">B1</option><option value="B2">B2</option>
-              <option value="C1">C1</option><option value="C2">C2</option>
-            </select>
-          </label>
-          <label>Start side
-            <select id="startSide"><option value="left">Left</option><option value="right">Right</option></select>
-          </label>
-          <label>Start row
-            <select id="startRow"><option value="top">Top</option><option value="bottom">Bottom</option></select>
-          </label>
-          <label>Pattern
-            <select id="pattern">
-              <option value="raster">Raster (row→row)</option>
-              <option value="serpentine">Serpentine (row→row)</option>
-              <option value="raster-col">Raster (column→column)</option>
-              <option value="serpentine-col">Serpentine (column→column)</option>
-              <option value="random">Random</option>
-            </select>
-          </label>
-          <button id="generateBtn" class="btn primary">Generate</button>
-        </div>
-      </details>
+      <div class="plan-bar">
+        <label class="inline">Section
+          <select id="sectionSelect">
+            <option value="A">A (1‑65)</option><option value="B">B (66‑130)</option><option value="C">C (131‑195)</option>
+            <option value="A1">A1</option><option value="A2">A2</option>
+            <option value="B1">B1</option><option value="B2">B2</option>
+            <option value="C1">C1</option><option value="C2">C2</option>
+          </select>
+        </label>
+        <button id="generateBtn" class="btn tool" title="Regenerate (reshuffles a random plan)"><span class="ico" aria-hidden="true">↻</span><span class="lbl">Regenerate</span></button>
+        <button id="planOptsBtn" class="btn tool" aria-haspopup="dialog"><span class="ico" aria-hidden="true">⚙️</span><span class="lbl">Layout options</span></button>
+      </div>
       <div id="planHolder"></div>
     </section>
   </main>
@@ -184,7 +162,7 @@
     Made&nbsp;by
     <a href="https://sajid.buet.ac.bd" target="_blank" rel="noopener">Dr.&nbsp;Sajid&nbsp;Muhaimin&nbsp;Choudhury</a>
     using OpenAI o3. <a href="https://github.com/sajidbuet/ctadmin">Source code</a> on GitHub under the
-    <a href="javascript:void(0)" id="mitLicenseLink">MIT license</a>.
+    <a href="#license" id="mitLicenseLink">MIT license</a>.
   </footer>
 </div>
 
@@ -196,20 +174,38 @@
 
 <!-- ───────── Projection controls (auto-hide) ───────── -->
 <div id="projBar" role="toolbar" aria-label="Projection controls">
-  <button id="projPlay" class="btn go" title="Start / pause (Space)">▶</button>
-  <button id="projReset" class="btn stop" title="Reset" disabled>■</button>
-  <button id="projMute" class="btn tool" title="Mute / unmute">🔉</button>
+  <button id="projPlay" data-action="play" class="btn go" title="Start / pause (Space)"><span class="ico" aria-hidden="true">▶</span><span class="lbl">Start</span></button>
+  <button id="projReset" data-action="reset" class="btn stop" title="Reset (R)" disabled><span class="ico" aria-hidden="true">↺</span><span class="lbl">Reset</span></button>
+  <button id="projMute" data-mute class="btn tool" title="Mute (M)" aria-label="Mute" aria-pressed="false">🔉</button>
   <button id="projExit" class="btn tool" title="Exit projection (Esc)">✕ Exit</button>
 </div>
 
-<!-- ───────── Settings modal ───────── -->
-<div id="settingsModal" class="modal-overlay" style="display:none;">
-  <div class="modal">
-    <button id="settingsClose" class="modal-close" aria-label="Close">✕</button>
-    <h2>Settings</h2>
+<!-- ───────── Settings drawer ───────── -->
+<dialog id="settingsDrawer" class="drawer" aria-labelledby="settingsTitle">
+  <div class="drawer-head">
+    <h2 id="settingsTitle">Settings</h2>
+    <button id="settingsClose" class="btn tool icon" aria-label="Close settings">✕</button>
+  </div>
+  <div class="drawer-body">
 
-    <div class="settings-group">
-      <label>Projection layout
+    <section id="setDisplay" aria-labelledby="hDisplay">
+      <h3 id="hDisplay">Display</h3>
+      <label class="field">Theme
+        <select id="themeSelect">
+          <option value="system">Follow system</option>
+          <option value="light">Light</option>
+          <option value="dark">Dark</option>
+        </select>
+      </label>
+      <label class="field">Interface size
+        <select id="uiScale">
+          <option value="0.9">Small</option>
+          <option value="1">Normal</option>
+          <option value="1.15">Large</option>
+          <option value="1.3">Extra large</option>
+        </select>
+      </label>
+      <label class="field">Projection layout
         <select id="projLayout">
           <option value="auto">Auto (by screen shape)</option>
           <option value="side">Timer beside plan</option>
@@ -218,32 +214,84 @@
           <option value="plan">Plan only</option>
         </select>
       </label>
-    </div>
+    </section>
 
-    <h3>Custom seat settings</h3>
-    <label class="check"><input type="checkbox" id="useCustomSettings"> Use custom settings</label>
-    <div id="customSettings" class="settings-group">
-      <label>Start roll <input type="number" id="customStartRoll" min="1"></label>
-      <label>Student count <input type="number" id="customStudentCount" min="1"></label>
-      <label>Section label <input type="text" id="customSectionLabel"></label>
-      <label>Seat rows <input type="number" id="customSeatRows" min="1"></label>
-      <label>Seat columns <input type="number" id="customSeatCols" min="1"></label>
-    </div>
-    <div class="settings-actions">
-      <button id="saveSettings" class="btn tool">💾 Save</button>
-      <input type="file" id="loadSettings" accept=".json" style="display:none">
-      <button id="loadSettingsBtn" class="btn tool">📂 Load</button>
-    </div>
-  </div>
-</div>
+    <section id="setSound" aria-labelledby="hSound">
+      <h3 id="hSound">Sound</h3>
+      <div class="field">
+        <span id="volLbl">Volume</span>
+        <span class="vol">
+          <button data-mute class="btn tool icon" aria-label="Mute" aria-pressed="false">🔉</button>
+          <input type="range" id="volumeSlider" min="0" max="1" step="0.01" value="1" aria-labelledby="volLbl">
+        </span>
+      </div>
+      <label class="field">3‑2‑1 pre-count at start and end <input type="checkbox" id="precountToggle" checked></label>
+      <fieldset class="cues">
+        <legend>Announcements</legend>
+        <label class="check"><input type="checkbox" data-cue="start" checked> Start gong</label>
+        <label class="check"><input type="checkbox" data-cue="five" checked> 5 minutes left</label>
+        <label class="check"><input type="checkbox" data-cue="one" checked> 1 minute left</label>
+        <label class="check"><input type="checkbox" data-cue="end" checked> Time up</label>
+      </fieldset>
+      <button id="testSound" class="btn tool">🔔 Test speakers</button>
+    </section>
 
-<!-- ───────── License modal ───────── -->
-<div id="mitModal" class="modal-overlay" style="display:none;">
-  <div class="modal">
-    <button id="mitCloseBtn" class="modal-close" aria-label="Close">✕</button>
-    <h2>MIT License</h2>
-    <pre id="mitText" class="modal-text"></pre>
+    <section id="setPlan" aria-labelledby="hPlan">
+      <h3 id="hPlan">Seat plan</h3>
+      <label class="field">Start side
+        <select id="startSide"><option value="left">Left</option><option value="right">Right</option></select>
+      </label>
+      <label class="field">Start row
+        <select id="startRow"><option value="top">Top</option><option value="bottom">Bottom</option></select>
+      </label>
+      <label class="field">Pattern
+        <select id="pattern">
+          <option value="raster">Raster (row→row)</option>
+          <option value="serpentine">Serpentine (row→row)</option>
+          <option value="raster-col">Raster (column→column)</option>
+          <option value="serpentine-col">Serpentine (column→column)</option>
+          <option value="random">Random</option>
+        </select>
+      </label>
+      <details class="custom">
+        <summary>Custom layout <small>(saved, not applied yet)</small></summary>
+        <label class="field">Use custom settings <input type="checkbox" id="useCustomSettings"></label>
+        <div id="customSettings" hidden>
+          <label class="field">Start roll <input type="number" id="customStartRoll" min="1"></label>
+          <label class="field">Student count <input type="number" id="customStudentCount" min="1"></label>
+          <label class="field">Section label <input type="text" id="customSectionLabel"></label>
+          <label class="field">Seat rows <input type="number" id="customSeatRows" min="1"></label>
+          <label class="field">Seat columns <input type="number" id="customSeatCols" min="1"></label>
+        </div>
+        <div class="settings-actions">
+          <button id="saveSettings" class="btn tool">💾 Save file</button>
+          <input type="file" id="loadSettings" accept=".json" hidden>
+          <button id="loadSettingsBtn" class="btn tool">📂 Load file</button>
+        </div>
+      </details>
+    </section>
+
+    <section id="setKeys" aria-labelledby="hKeys">
+      <h3 id="hKeys">Keyboard shortcuts</h3>
+      <dl class="keys">
+        <dt><kbd>Space</kbd></dt><dd>Start / pause / resume</dd>
+        <dt><kbd>R</kbd></dt><dd>Reset (press twice while a test is running)</dd>
+        <dt><kbd>↑</kbd> <kbd>↓</kbd></dt><dd>±1 minute</dd>
+        <dt><kbd>→</kbd> <kbd>←</kbd></dt><dd>±30 seconds</dd>
+        <dt><kbd>M</kbd></dt><dd>Mute / unmute</dd>
+        <dt><kbd>F</kbd></dt><dd>Fullscreen</dd>
+        <dt><kbd>P</kbd></dt><dd>Projection mode</dd>
+        <dt><kbd>Esc</kbd></dt><dd>Exit projection / close this panel</dd>
+      </dl>
+    </section>
   </div>
-</div>
+</dialog>
+
+<!-- ───────── License dialog ───────── -->
+<dialog id="mitModal" class="modal" aria-labelledby="mitTitle">
+  <button id="mitCloseBtn" class="modal-close" aria-label="Close">✕</button>
+  <h2 id="mitTitle">MIT License</h2>
+  <pre id="mitText" class="modal-text"></pre>
+</dialog>
 </body>
 </html>

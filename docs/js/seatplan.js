@@ -59,9 +59,18 @@ function renderPlan() {
     serpentine: pattern.startsWith('serpentine'),
     random:     pattern === 'random',
   });
-  const cols = cfg.dense ? 12 : 12;   /* sparse = 6 seats + 6 blanks */
+  const cols = 12;   /* dense = 12 seats; sparse = 6 seats + 6 blanks */
   document.getElementById('planHolder').innerHTML =
     `<div class="plan-container" style="--cols:${cols};--rows:${rows.length}"><h1>Seat Plan for Section ${section}</h1>
      <div class="podium"></div>${buildTable(rows, cfg.dense)}</div>`;
 }
+
+/* plan options: restored from prefs, re-render on any change */
+const PLAN_FIELDS = ['sectionSelect', 'startSide', 'startRow', 'pattern'];
+prefs.plan = prefs.plan || {};
+PLAN_FIELDS.forEach(id => {
+  const el = document.getElementById(id);
+  if (prefs.plan[id] && [...el.options].some(o => o.value === prefs.plan[id])) el.value = prefs.plan[id];
+  el.addEventListener('change', () => { prefs.plan[id] = el.value; savePrefs(); renderPlan(); });
+});
 document.getElementById('generateBtn').onclick = renderPlan;
