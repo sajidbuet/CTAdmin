@@ -14,7 +14,10 @@ const Snd = (() => {
 
   const play = (a, then) => {
     a.currentTime = 0;
-    a.play().catch(e => console.warn('Audio blocked:', e));
+    a.play().catch(e => {
+      if (e.name === 'NotAllowedError') document.dispatchEvent(new Event('soundblocked'));   // guard.js shows a banner
+      else console.warn('Audio failed:', e);
+    });
     if (then) a.addEventListener('ended', () => play(then), { once: true });
   };
   const cue = (name, a, then) => { if (prefs.cues[name]) play(a, then); };
