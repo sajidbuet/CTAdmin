@@ -34,6 +34,18 @@ const Snd = (() => {
   }
   const toggleMute = () => setVolume(volume > 0 ? 0 : lastVolume);
 
+  /* Spoken cues follow the interface language: audio/bn/<name>.mp3, falling back to English if missing. */
+  function setVoiceLang() {
+    document.querySelectorAll('audio[data-voice]').forEach(a => {
+      const en = `audio/${a.dataset.voice}.mp3`, want = prefs.lang === 'bn' ? `audio/bn/${a.dataset.voice}.mp3` : en;
+      if (a.getAttribute('src') === want) return;
+      a.onerror = want === en ? null : () => { a.onerror = null; a.src = en; };
+      a.src = want;
+    });
+  }
+  document.addEventListener('langchange', setVoiceLang);
+  setVoiceLang();
+
   volSlider.addEventListener('input', e => setVolume(parseFloat(e.target.value)));
   muteBtns.forEach(b => b.addEventListener('click', toggleMute));
   setVolume(volume);

@@ -29,9 +29,10 @@ function refreshEditor() {
 function showStatus(L) {
   const cap = capacity(L), short = L.count - cap;
   layoutStatus.className = 'layout-status ' + (short > 0 ? 'err' : 'ok');
+  const v = { cap, n: L.count, short, spare: cap - L.count, b: L.blocked.length };
   layoutStatus.textContent = short > 0
-    ? `${cap} seats for ${L.count} students: ${short} short. Add rows, seats per row, or unblock seats.`
-    : `${cap} seats for ${L.count} students (${cap - L.count} spare)${L.blocked.length ? `, ${L.blocked.length} blocked` : ''}.`;
+    ? t('{cap} seats for {n} students: {short} short. Add rows, seats per row, or unblock seats.', v)
+    : t(v.b ? '{cap} seats for {n} students ({spare} spare), {b} blocked.' : '{cap} seats for {n} students ({spare} spare).', v);
 }
 
 /* typing updates the plan live; leaving a field writes back the cleaned-up value */
@@ -51,17 +52,17 @@ function addLayout(L, select = true) {
   return id;
 }
 $id('newLayoutBtn').addEventListener('click', () => {
-  addLayout({ name: 'New layout', label: 'Custom', startRoll: 1, count: 60, rows: 6, cols: 10, walkways: [5], podium: 'top' });
+  addLayout({ name: t('New layout'), label: t('Custom'), startRoll: 1, count: 60, rows: 6, cols: 10, walkways: [5], podium: 'top' });
   LF.name.focus(); LF.name.select();
 });
 $id('dupLayoutBtn').addEventListener('click', () => {
   const L = currentLayout();
-  addLayout({ ...L, name: `${L.name} (copy)` });
+  addLayout({ ...L, name: t('{name} (copy)', { name: L.name }) });
   LF.name.focus(); LF.name.select();
 });
 $id('deleteLayoutBtn').addEventListener('click', () => {
   const id = prefs.layoutId;
-  if (isBuiltin(id) || !confirm(`Delete layout “${currentLayout().name}”?`)) return;
+  if (isBuiltin(id) || !confirm(t('Delete layout “{name}”?', { name: currentLayout().name }))) return;
   delete prefs.layouts[id]; savePrefs();
   fillLayoutSelect();
   selectLayout('A');
@@ -85,6 +86,7 @@ $id('clearBlockedBtn').addEventListener('click', () => {
   refreshEditor();
 });
 document.addEventListener('layoutchange', refreshEditor);
+document.addEventListener('langchange', refreshEditor);
 
 /* ---- import / export (JSON) ---- */
 $id('exportLayoutBtn').addEventListener('click', () => {
@@ -99,7 +101,7 @@ $id('exportLayoutBtn').addEventListener('click', () => {
 /* accepts this app's export, a bare layout, an array / {layouts:[…]}, or the pre-Phase-3 custom-settings file */
 function layoutsFromJSON(d) {
   const fromLegacy = o => ({
-    name: o.sectionLabel ? `${o.sectionLabel} (imported)` : 'Imported layout', label: o.sectionLabel || '',
+    name: o.sectionLabel ? t('{label} (imported)', { label: o.sectionLabel }) : t('Imported layout'), label: o.sectionLabel || '',
     startRoll: o.startRoll, count: o.studentCount, rows: o.seatRows, cols: o.seatCols,
   });
   const one = o => (o && typeof o === 'object' ? ('studentCount' in o || 'seatRows' in o ? fromLegacy(o) : o) : null);
@@ -123,7 +125,7 @@ fileIn.addEventListener('change', () => {
     });
     savePrefs();
     selectLayout(lastId);
-  }).catch(() => alert('This file is not a CTAdmin layout.'));
+  }).catch(() => alert(t('This file is not a CTAdmin layout.')));
 });
 
 /* ---- one-time migration of the pre-Phase-3 "custom settings" ---- */
@@ -133,7 +135,7 @@ fileIn.addEventListener('change', () => {
   let old;
   try { old = JSON.parse(localStorage.getItem('ctadmin_customSettings')); } catch { return; }
   if (!old || !(old.studentCount && old.seatRows && old.seatCols)) return;
-  const id = addLayout({ ...fromLegacyShape(old), name: 'Custom (from old settings)' }, false);
+  const id = addLayout({ ...fromLegacyShape(old), name: t('Custom (from old settings)') }, false);
   if (old.useCustom) selectLayout(id);
   function fromLegacyShape(o) { return layoutsFromJSON(o)[0]; }
 })();

@@ -15,20 +15,20 @@ const playBtns  = document.querySelectorAll('[data-action="play"]');
 const resetBtns = document.querySelectorAll('[data-action="reset"]');
 const srStatus  = $id('srStatus');
 
-const fmt = t => `${pad((t / 60) | 0)}:${pad(t % 60)}`;
+const fmt = sec => num(`${pad((sec / 60) | 0)}:${pad(sec % 60)}`);
 const timerStatus = () => running ? 'running' : paused ? 'paused' : starting ? 'starting' : remain === 0 ? 'done' : 'idle';
 
 function drawPie() {
   fill.style.strokeDashoffset = (FULL_LEN * (1 - remain / initialDuration)).toFixed(1);
   timeLabel_text.textContent = fmt(remain);
-  pie.setAttribute('aria-label', `Time remaining ${fmt(remain)}`);
+  pie.setAttribute('aria-label', t('Time remaining {time}', { time: fmt(remain) }));
 }
 function updateEndLabel() {
-  const st = timerStatus();
+  const st = timerStatus(), at = () => endTime.toLocaleTimeString(userLocale());
   endLbl.textContent =
-    st === 'paused'  ? 'Paused' :
-    st === 'done'    ? `Ended at ${endTime ? endTime.toLocaleTimeString() : ''}` :
-    endTime          ? `Ends at ${endTime.toLocaleTimeString()}` : ' ';
+    st === 'paused'  ? t('Paused') :
+    st === 'done'    ? t('Ended at {time}', { time: endTime ? at() : '' }) :
+    endTime          ? t('Ends at {time}', { time: at() }) : ' ';
 }
 
 /* ---------- persistence ---------- */
@@ -156,30 +156,30 @@ const PLAY_UI = {
   paused:   ['▶', 'Resume', 'go'],
   done:     ['▶', 'Restart', 'go'],
 };
-const STATUS_TEXT = { idle: 'Timer ready', starting: 'Starting', running: 'Timer running', paused: 'Timer paused', done: 'Time is up' };
+const STATUS_TEXT = { idle: 'Timer ready', starting: 'Starting', running: 'Timer running', paused: 'Timer paused', done: 'Time is up' };  // translated when shown
 let lastStatus = null;
 
 function syncButtons() {
   const st = timerStatus();
   body.dataset.timer = st;
-  const [ico, lbl, cls] = PLAY_UI[st];
+  const [ico, key, cls] = PLAY_UI[st], lbl = t(key);
   playBtns.forEach(b => {
     b.querySelector('.ico').textContent = ico;
     b.querySelector('.lbl').textContent = lbl;
     b.classList.remove('go', 'warn'); b.classList.add(cls);
     b.disabled = st === 'starting';
-    b.setAttribute('aria-label', `${lbl} timer`);
+    b.setAttribute('aria-label', t('{action} timer', { action: lbl }));
   });
   resetBtns.forEach(b => {
     b.disabled = st === 'idle' || st === 'starting';
     b.classList.toggle('armed', !!resetArmed);
-    b.querySelector('.lbl').textContent = resetArmed ? 'Confirm?' : 'Reset';
-    b.setAttribute('aria-label', resetArmed ? 'Press again to confirm reset' : 'Reset timer');
+    b.querySelector('.lbl').textContent = t(resetArmed ? 'Confirm?' : 'Reset');
+    b.setAttribute('aria-label', t(resetArmed ? 'Press again to confirm reset' : 'Reset timer'));
   });
   const lock = st === 'running' || st === 'paused' || st === 'starting';
   durInput.disabled = durInc.disabled = durDec.disabled = lock;
   quickBtns.forEach(b => b.disabled = lock);
-  if (st !== lastStatus) { srStatus.textContent = STATUS_TEXT[st]; lastStatus = st; }
+  if (st !== lastStatus) { srStatus.textContent = t(STATUS_TEXT[st]); lastStatus = st; }
 }
 
 /* ---------- 3-2-1 pre-count ---------- */
@@ -192,7 +192,7 @@ async function runPrecount() {
   timeLabel_text.setAttribute('display', 'none');
   precount_text.setAttribute('display', 'block');
   for (const n of [3, 2, 1]) {
-    precount_text.textContent = n;
+    precount_text.textContent = num(n);
     Snd.tick();
     await new Promise(r => setTimeout(r, 1000));
   }
@@ -203,9 +203,13 @@ async function runPrecount() {
 }
 
 /* ---------- master second tick (aligned to the real second) ---------- */
+function showClock(now = new Date()) {
+  const loc = userLocale();
+  dateLbl.textContent = `${now.toLocaleDateString(loc, { day: '2-digit', month: 'long', year: 'numeric' })} ${now.toLocaleTimeString(loc)}`;
+}
 function tick() {
   const now = new Date();
-  dateLbl.textContent = `${now.toLocaleDateString(undefined, { day: '2-digit', month: 'long', year: 'numeric' })} ${now.toLocaleTimeString()}`;
+  showClock(now);
   if (running) {
     remain = Math.max(0, Math.ceil((endTime.getTime() - now.getTime()) / 1000));
     updateEndLabel(); drawPie();
@@ -215,6 +219,20 @@ function tick() {
   }
   setTimeout(tick, 1000 - now.getMilliseconds());
 }
+
+/* ---------- language: chip labels, and re-render everything above that shows text ---------- */
+function labelChips() {
+  quickBtns.forEach(b => { b.textContent = num(b.dataset.min); b.setAttribute('aria-label', t('Set {n} minutes', { n: +b.dataset.min })); });
+  document.querySelectorAll('button.adj').forEach(b => {
+    const sec = parseInt(b.dataset.sec, 10), sign = sec < 0 ? '−' : '+', a = Math.abs(sec);
+    b.textContent = a % 60 ? t('{sign}{n} s', { sign, n: a }) : t('{sign}{n} min', { sign, n: a / 60 });
+  });
+}
+labelChips();
+document.addEventListener('langchange', () => {
+  labelChips(); showClock(); drawPie(); updateEndLabel();
+  lastStatus = null; syncButtons();
+});
 
 /* ---------- wiring ---------- */
 quickBtns.forEach(b => b.addEventListener('click', () => setDuration(b.dataset.min * 60)));

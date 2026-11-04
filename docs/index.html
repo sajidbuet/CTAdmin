@@ -10,13 +10,15 @@
 
   <audio id="gongStart" src="audio/gong-start.mp3" preload="auto"></audio>
   <audio id="endBell" src="audio/end-bell.mp3" preload="auto"></audio>
-  <audio id="pleaseStop" src="audio/please-stop-writing.mp3" preload="auto"></audio>
+  <audio id="pleaseStop" data-voice="please-stop-writing" src="audio/please-stop-writing.mp3" preload="auto"></audio>
   <audio id="fiveMinBell" src="audio/5min-bell.mp3" preload="auto"></audio>
-  <audio id="lastFive" src="audio/last-five-minutes.mp3" preload="auto"></audio>
-  <audio id="lastminute" src="audio/lastminute.mp3" preload="auto"></audio>
+  <audio id="lastFive" data-voice="last-five-minutes" src="audio/last-five-minutes.mp3" preload="auto"></audio>
+  <audio id="lastminute" data-voice="lastminute" src="audio/lastminute.mp3" preload="auto"></audio>
   <audio id="ticksound" src="audio/tick.mp3" preload="auto"></audio>
 
   <script src="js/state.js" defer></script>
+  <script src="i18n/bn.js" defer></script>
+  <script src="js/i18n.js" defer></script>
   <script src="js/audio.js" defer></script>
   <script src="js/seatplan.js" defer></script>
   <script src="js/dial.js" defer></script>
@@ -86,6 +88,7 @@
     <nav class="actions" aria-label="View">
       <button id="toggleTimerBtn" class="btn tool" aria-pressed="true" title="Show/hide timer"><span class="ico">⏱</span><span class="lbl">Timer</span></button>
       <button id="togglePlanBtn" class="btn tool" aria-pressed="true" title="Show/hide seat plan"><span class="ico">🪑</span><span class="lbl">Plan</span></button>
+      <button id="langBtn" class="btn tool"><span class="ico" aria-hidden="true">অ</span><span class="lbl">বাংলা</span></button>
       <button id="fsToggle" class="btn tool" title="Fullscreen (F)" aria-label="Fullscreen"><span class="ico" aria-hidden="true">⛶</span><span class="lbl">Fullscreen</span></button>
       <button id="settingsGear" class="btn tool" title="Settings" aria-label="Settings" aria-haspopup="dialog"><span class="ico" aria-hidden="true">⚙️</span><span class="lbl">Settings</span></button>
       <button id="projBtn" class="btn primary" title="Projection mode (P)" aria-label="Projection mode"><span class="ico" aria-hidden="true">📽</span><span class="lbl">Project</span></button>
@@ -192,6 +195,19 @@
 
     <section id="setDisplay" aria-labelledby="hDisplay">
       <h3 id="hDisplay">Display</h3>
+      <label class="field">Language
+        <select id="langSelect">
+          <option value="en" lang="en">English</option>
+          <option value="bn" lang="bn">বাংলা</option>
+        </select>
+      </label>
+      <label class="field">Numerals
+        <select id="numSelect">
+          <option value="auto">Match language</option>
+          <option value="latn">0 1 2 3</option>
+          <option value="beng" lang="bn">০ ১ ২ ৩</option>
+        </select>
+      </label>
       <label class="field">Theme
         <select id="themeSelect">
           <option value="system">Follow system</option>
@@ -301,6 +317,7 @@
         <dt><kbd>M</kbd></dt><dd>Mute / unmute</dd>
         <dt><kbd>F</kbd></dt><dd>Fullscreen</dd>
         <dt><kbd>P</kbd></dt><dd>Projection mode</dd>
+        <dt><kbd>L</kbd></dt><dd>Switch language (English / বাংলা)</dd>
         <dt><kbd>Esc</kbd></dt><dd>Exit projection or seat blocking / close this panel</dd>
       </dl>
     </section>

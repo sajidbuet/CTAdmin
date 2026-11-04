@@ -14,6 +14,22 @@ $id('settingsGear').addEventListener('click', () => openSettings());
 $id('planOptsBtn').addEventListener('click', () => openSettings('setPlan'));
 $id('settingsClose').addEventListener('click', closeSettings);
 
+/* ---- Display: language & numerals (engine in i18n.js) ---- */
+function syncLangUI() {
+  $id('langSelect').value = prefs.lang;
+  $id('numSelect').value = prefs.numerals;
+  const b = $id('langBtn'), toBn = prefs.lang !== 'bn';      // the button offers the other language, written in it
+  b.lang = toBn ? 'bn' : 'en';
+  b.title = toBn ? 'বাংলায় দেখুন (L)' : 'Switch to English (L)';
+  b.querySelector('.ico').textContent = toBn ? 'অ' : 'A';
+  b.querySelector('.lbl').textContent = toBn ? 'বাংলা' : 'English';
+}
+const toggleLang = () => setLang(prefs.lang === 'bn' ? 'en' : 'bn');
+$id('langSelect').addEventListener('change', e => setLang(e.target.value));
+$id('numSelect').addEventListener('change', e => setNumerals(e.target.value));
+$id('langBtn').addEventListener('click', toggleLang);
+document.addEventListener('langchange', syncLangUI);
+
 /* ---- Display: theme ---- */
 const mqDark = matchMedia('(prefers-color-scheme: dark)');
 function applyTheme() {
@@ -47,6 +63,7 @@ document.querySelectorAll('[data-cue]').forEach(cb => {
 $id('testSound').addEventListener('click', () => Snd.test());
 
 /* ---- restore ---- */
+syncLangUI();
 applyTheme();
 applyScale(prefs.scale || '1');
 setProjLayout(prefs.proj || 'auto');

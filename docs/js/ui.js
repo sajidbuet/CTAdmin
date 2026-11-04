@@ -80,6 +80,7 @@ function onShortcut(e) {
     case 'm':          once(Snd.toggleMute); break;
     case 'f':          once(toggleFS); break;
     case 'p':          once(inProjection() ? exitProjection : enterProjection); break;
+    case 'l':          once(toggleLang); break;
     case 'Escape':
       if (body.classList.contains('edit-seats')) setSeatEdit(false);
       else if (inProjection()) exitProjection();

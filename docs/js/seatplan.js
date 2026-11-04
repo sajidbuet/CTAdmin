@@ -9,12 +9,15 @@
    Fill options (side, start row, pattern, random seed) are plan-wide and live in prefs.plan. */
 
 const BUILTIN = {};
-[['A', 1], ['B', 66], ['C', 131]].forEach(([s, st]) => {
+function buildBuiltins() {            // names/labels follow the interface language
   const base = { rows: 6, cols: 12, walkways: [6], blocked: [], podium: 'top' };
-  BUILTIN[s]       = { ...base, name: `${s} (${st}–${st + 64})`, label: `Section ${s}`, startRoll: st, count: 65, skipAlternate: false };
-  BUILTIN[s + '1'] = { ...base, name: `${s}1 (${st}–${st + 32})`, label: `Section ${s}1`, startRoll: st, count: 33, skipAlternate: true };
-  BUILTIN[s + '2'] = { ...base, name: `${s}2 (${st + 33}–${st + 64})`, label: `Section ${s}2`, startRoll: st + 33, count: 32, skipAlternate: true };
-});
+  const nm = (id, a, b) => `${id} (${num(a)}–${num(b)})`, lb = id => t('Section {s}', { s: id });
+  [['A', 1], ['B', 66], ['C', 131]].forEach(([s, st]) => {
+    BUILTIN[s]       = { ...base, name: nm(s, st, st + 64),           label: lb(s),       startRoll: st,      count: 65, skipAlternate: false };
+    BUILTIN[s + '1'] = { ...base, name: nm(s + '1', st, st + 32),      label: lb(s + '1'), startRoll: st,      count: 33, skipAlternate: true };
+    BUILTIN[s + '2'] = { ...base, name: nm(s + '2', st + 33, st + 64), label: lb(s + '2'), startRoll: st + 33, count: 32, skipAlternate: true };
+  });
+}
 
 const LIMITS = { rows: [1, 40], cols: [1, 40], count: [1, 1600], startRoll: [0, 999999999] };
 const toInt = (v, [lo, hi], d) => { const n = Math.round(Number(v)); return v !== '' && Number.isFinite(n) ? Math.min(hi, Math.max(lo, n)) : d; };
@@ -23,7 +26,7 @@ const parseWalkways = v => (Array.isArray(v) ? v : String(v ?? '').split(/[\s,;]
 function normalizeLayout(src = {}) {
   const rows = toInt(src.rows, LIMITS.rows, 6), cols = toInt(src.cols, LIMITS.cols, 12);
   return {
-    name:  String(src.name || src.label || 'My layout').trim().slice(0, 60),
+    name:  String(src.name || src.label || t('My layout')).trim().slice(0, 60),
     label: String(src.label ?? '').trim().slice(0, 60),
     startRoll: toInt(src.startRoll, LIMITS.startRoll, 1),
     count: toInt(src.count, LIMITS.count, 1),
@@ -83,6 +86,7 @@ function seededShuffle(arr, seed) {
 }
 
 const pad = n => (n < 10 ? '0' + n : String(n));
+buildBuiltins();
 const esc = s => String(s).replace(/[&<>"']/g, ch => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[ch]);
 
 /* ---------- presets & selection ---------- */
@@ -102,8 +106,8 @@ function fillLayoutSelect() {
   const opt = (id, L) => `<option value="${esc(id)}">${esc(L.name)}</option>`;
   const mine = Object.entries(prefs.layouts).sort((a, b) => a[1].name.localeCompare(b[1].name));
   layoutSelect.innerHTML =
-    `<optgroup label="Built-in">${Object.entries(BUILTIN).map(([id, L]) => opt(id, L)).join('')}</optgroup>` +
-    (mine.length ? `<optgroup label="My layouts">${mine.map(([id, L]) => opt(id, L)).join('')}</optgroup>` : '');
+    `<optgroup label="${esc(t('Built-in'))}">${Object.entries(BUILTIN).map(([id, L]) => opt(id, L)).join('')}</optgroup>` +
+    (mine.length ? `<optgroup label="${esc(t('My layouts'))}">${mine.map(([id, L]) => opt(id, L)).join('')}</optgroup>` : '');
   layoutSelect.value = prefs.layoutId;
 }
 function selectLayout(id) {
@@ -157,13 +161,13 @@ function planModel() {
   const digits = Math.max(2, String(last).length);
   return {
     L, fill, rows, aisleCount: aisles.size,
-    title: L.label ? `Seat Plan for ${L.label}` : 'Seat Plan',
-    sub: `Rolls ${pad(L.startRoll)}–${pad(last)} · ${L.count} students`,
+    title: L.label ? t('Seat Plan for {label}', { label: L.label }) : t('Seat Plan'),
+    sub: t('Rolls {a}–{b} · {n} students', { a: num(pad(L.startRoll)), b: num(pad(last)), n: L.count }),
     unseated: Math.max(0, L.count - order.length),
     fs: Math.min(0.4, 1.25 / digits),
   };
 }
-const unseatedText = n => `⚠ ${n} student${n > 1 ? 's have' : ' has'} no seat. Add rows or seats per row.`;
+const unseatedText = n => t(n > 1 ? '⚠ {n} students have no seat. Add rows or seats per row.' : '⚠ {n} student has no seat. Add rows or seats per row.', { n });
 
 /* ---------- render ---------- */
 function renderPlan() {
@@ -176,10 +180,10 @@ function renderPlan() {
     if (s.aisle) { cells += '<div class="aisle"></div>'; continue; }
     const cls = s.blocked ? 'seat blocked' : s.skipped ? 'seat skipped' : s.roll === undefined ? 'seat empty' : 'seat';
     const attrs = editing && !s.skipped
-      ? ` type="button" data-rc="${s.key}" aria-pressed="${s.blocked}" aria-label="Row ${s.r + 1}, seat ${s.c + 1}${s.blocked ? ', blocked' : ''}"`
+      ? ` type="button" data-rc="${s.key}" aria-pressed="${s.blocked}" aria-label="${esc(t(s.blocked ? 'Row {r}, seat {c}, blocked' : 'Row {r}, seat {c}', { r: s.r + 1, c: s.c + 1 }))}"`
       : (editing ? ' type="button" disabled' : '');
     cells += `<${tag} class="${cls}"${attrs}>` +
-      (s.roll !== undefined ? `<span class="seat-num">${pad(s.roll)}</span><span class="chair"></span>` : s.blocked ? '<span class="x" aria-hidden="true">✕</span>' : '') +
+      (s.roll !== undefined ? `<span class="seat-num">${num(pad(s.roll))}</span><span class="chair"></span>` : s.blocked ? '<span class="x" aria-hidden="true">✕</span>' : '') +
       `</${tag}>`;
   }
   $id('planHolder').innerHTML =
@@ -194,10 +198,12 @@ function renderPlan() {
 }
 
 /* ---------- PNG export (drawn on a canvas; always light colours) ---------- */
-function exportPlanPNG() {
+async function exportPlanPNG() {
+  /* make sure the bundled Bengali font is loaded before drawing (canvas does not wait for it) */
+  if (document.fonts && document.fonts.load) await Promise.all(['400', '700'].map(w => document.fonts.load(`${w} 20px "CT Bengali"`, 'অ০'))).catch(() => {});
   const M = planModel(), L = M.L;
   const S = 72, seatH = S * 0.98, gap = S * 0.12, aisleW = S * 0.6, margin = 48, scale = 2;
-  const FONT = '"Segoe UI", system-ui, Roboto, Helvetica, Arial, sans-serif';
+  const FONT = '"CT Bengali", "Segoe UI", system-ui, Roboto, Helvetica, Arial, sans-serif';
   const C = { bg: '#ffffff', txt: '#111111', muted: '#555555', line: '#8c8c8c', chair: '#8c8c8c', pri: '#AC1F24', warn: '#b3261e' };
   const gridW = L.cols * S + M.aisleCount * aisleW;
   const gridH = L.rows * seatH + (L.rows - 1) * gap;
@@ -250,7 +256,7 @@ function exportPlanPNG() {
       if (s.roll !== undefined) {
         const fpx = S * M.fs;
         ctx.fillStyle = C.txt; ctx.font = `700 ${fpx}px ${FONT}`;
-        ctx.fillText(pad(s.roll), x + S / 2, top + S * 0.07, S * 0.92);
+        ctx.fillText(num(pad(s.roll)), x + S / 2, top + S * 0.07, S * 0.92);
         const cw = S * 0.58, ch = seatH * 0.26, cx = x + (S - cw) / 2, cy = top + S * 0.05 + fpx + S * 0.08;
         ctx.fillStyle = C.chair;
         rrect(cx, cy, cw, ch, 3); ctx.fill();
@@ -296,6 +302,8 @@ $id('planHolder').addEventListener('click', e => {
 $id('seatEditDone').addEventListener('click', () => setSeatEdit(false));
 $id('printBtn').addEventListener('click', () => { setSeatEdit(false); window.print(); });
 $id('pngBtn').addEventListener('click', () => { setSeatEdit(false); exportPlanPNG(); });
+
+document.addEventListener('langchange', () => { buildBuiltins(); fillLayoutSelect(); renderPlan(); });
 
 fillLayoutSelect();
 savePrefs();
