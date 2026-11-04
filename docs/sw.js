@@ -7,7 +7,7 @@ const VERSION = 'ctadmin-v1';
 const PRECACHE = [
   './', 'index.html', 'style.css', 'manifest.webmanifest',
   'js/state.js', 'i18n/bn.js', 'js/i18n.js', 'js/audio.js', 'js/seatplan.js', 'js/dial.js', 'js/timer.js',
-  'js/layouts.js', 'js/settings.js', 'js/ui.js', 'js/guard.js', 'js/main.js',
+  'js/layouts.js', 'js/settings.js', 'js/presets.js', 'js/ui.js', 'js/guard.js', 'js/main.js',
   'favicon.png', 'icons/icon-192.png', 'icons/icon-512.png',
   'fonts/noto-sans-bengali-bengali-wght-normal.woff2',
   'audio/gong-start.mp3', 'audio/end-bell.mp3', 'audio/please-stop-writing.mp3', 'audio/5min-bell.mp3',

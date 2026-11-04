@@ -180,6 +180,21 @@ I18N.bn = {
   '🔇 The browser is blocking sound until you click this page.': '🔇 পেজে একবার ক্লিক না করা পর্যন্ত ব্রাউজার শব্দ বন্ধ রাখছে।',
   'Enable sound': 'শব্দ চালু করুন',
 
+  /* ---- settings: timer presets ---- */
+  'Timer presets': 'টাইমার প্রিসেট',
+  'Quick buttons under the duration. A preset can also switch the seat-plan layout.': 'সময়কালের নিচের দ্রুত বোতাম। কোনো প্রিসেট চাইলে আসন বিন্যাসের লেআউটও বদলে দিতে পারে।',
+  '＋ Add preset': '＋ প্রিসেট যোগ করুন',
+  'Restore 10 / 15 / 20': '১০ / ১৫ / ২০ ফিরিয়ে আনুন',
+  'Button label': 'বোতামের নাম',
+  'Switch layout': 'লেআউট বদল',
+  'Minutes': 'মিনিট',
+  'Keep current layout': 'বর্তমান লেআউট রাখুন',
+  'Delete preset': 'প্রিসেট মুছুন',
+  'Preset {i}': 'প্রিসেট {i}',
+  '{label}: set {n} minutes': '{label}: {n} মিনিট নির্ধারণ করুন',
+  'and switch to layout {name}': 'এবং লেআউট {name}-এ যান',
+  'Up to {n} presets.': 'সর্বোচ্চ {n}টি প্রিসেট।',
+
   /* ---- settings: shortcuts ---- */
   'Keyboard shortcuts': 'কিবোর্ড শর্টকাট',
   'Start / pause / resume': 'শুরু / বিরতি / চালিয়ে যাওয়া',

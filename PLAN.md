@@ -56,5 +56,6 @@ Decisions: restyle/modernize, keep the #AC1F24 accent (assumed from "AC1f24"; co
 ## Phase 8 – README
 - Rewrite for the current app: modes, controls, shortcuts, layouts, Bengali, offline use, `file://` use, credits/licences (Noto Sans Bengali OFL, edge-tts voice).
 
-## Phase 9 – Timer presets
+## Phase 9 – Timer presets — DONE, awaiting owner review
 - The 10/15/20 chips become user presets (label, minutes, optional layout to switch to). Edited in Settings; saved in `ct_prefs`.
+- As built: `js/presets.js`; Settings → Timer presets (label ≤ 12 chars, minutes in 0.5 steps 0.5–180, layout or “—”, delete; add up to 6; restore 10/15/20). A chip that switches layout shows 🪑 and says so in its tooltip/label. Presets pointing at a deleted layout just set the time. Tested: apply, layout switch, clean-up of bad values, max 6, disabled while running, survives reload, Bengali; all 34 viewport/language/mode layout checks still clean.
