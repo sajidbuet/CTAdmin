@@ -143,9 +143,11 @@ function finish() {
   Snd.end();
 }
 
-function playWarningSounds() {
-  if (remain === 300) Snd.fiveMin();
-  if (remain === 60)  Snd.lastMinute();
+/* Cues fire when a tick crosses the mark, not only when it lands on it: a late tick (busy or background
+   tab) can jump from 5:01 to 4:59. `crossed(s)` is true when the previous tick was above s and this one is at/below. */
+function playWarningSounds(crossed) {
+  if (crossed(300)) Snd.fiveMin();
+  if (crossed(60))  Snd.lastMinute();
 }
 
 /* ---------- button state (main card + projection bar) ---------- */
@@ -183,15 +185,15 @@ function syncButtons() {
 }
 
 /* ---------- 3-2-1 pre-count ---------- */
-async function runPrecount() {
-  const offsetLen = 3 * fill.getTotalLength();
+async function runPrecount(from = 3) {             // counts from..1 (shorter if the end count started late)
+  const offsetLen = from * fill.getTotalLength();
   const styleTag = document.createElement('style');
   styleTag.textContent = `@keyframes fastFill { from { stroke-dashoffset: 0; } to { stroke-dashoffset: ${offsetLen}; } }`;
   document.head.appendChild(styleTag);
-  fill.style.animation = 'fastFill 2.9s linear';
+  fill.style.animation = `fastFill ${from - 0.1}s linear`;
   timeLabel_text.setAttribute('display', 'none');
   precount_text.setAttribute('display', 'block');
-  for (const n of [3, 2, 1]) {
+  for (let n = from; n >= 1; n--) {
     precount_text.textContent = num(n);
     Snd.tick();
     await new Promise(r => setTimeout(r, 1000));
@@ -207,16 +209,20 @@ function showClock(now = new Date()) {
   const loc = userLocale();
   dateLbl.textContent = `${now.toLocaleDateString(loc, { day: '2-digit', month: 'long', year: 'numeric' })} ${now.toLocaleTimeString(loc)}`;
 }
+let prevRemain = null;                               // remaining seconds at the previous running tick
 function tick() {
   const now = new Date();
   showClock(now);
   if (running) {
+    const prev = prevRemain ?? remain;
     remain = Math.max(0, Math.ceil((endTime.getTime() - now.getTime()) / 1000));
+    const crossed = s => prev > s && remain <= s;
     updateEndLabel(); drawPie();
-    if (remain === 3 && precountToggle.checked) runPrecount();
+    if (crossed(3) && remain > 0 && precountToggle.checked) runPrecount(remain);
     if (remain === 0) finish();
-    playWarningSounds();
-  }
+    playWarningSounds(crossed);
+    prevRemain = running ? remain : null;
+  } else prevRemain = null;
   setTimeout(tick, 1000 - now.getMilliseconds());
 }
 

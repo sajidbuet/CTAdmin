@@ -423,6 +423,13 @@ body.mode-projection #projBar {
 }
 #projBar .btn { border-radius: 999px; min-width: 56px; min-height: 56px; font-size: 1.1rem; }
 #projBar [data-action] .lbl { display: none; }
+#projBar .proj-adj { display: flex; gap: .5rem; }
+#projBar .adj { padding-inline: .9rem; font-weight: 600; white-space: nowrap; }
+/* narrow screens: the bar wraps to two rows (time adjust on its own row) instead of overflowing */
+@media (max-width: 640px) {
+  body.mode-projection #projBar { flex-wrap: wrap; justify-content: center; width: max-content; max-width: calc(100vw - 16px); border-radius: 32px; }
+  #projBar .proj-adj { order: -1; flex-basis: 100%; justify-content: center; }
+}
 #projBar .armed .lbl { display: inline; }
 body.mode-projection.idle #projBar { opacity: 0; pointer-events: none; }
 body.mode-projection.idle { cursor: none; }

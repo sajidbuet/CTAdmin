@@ -181,6 +181,11 @@
 <div id="projBar" role="toolbar" aria-label="Projection controls">
   <button id="projPlay" data-action="play" class="btn go" title="Start / pause (Space)"><span class="ico" aria-hidden="true">▶</span><span class="lbl">Start</span></button>
   <button id="projReset" data-action="reset" class="btn stop" title="Reset (R)" disabled><span class="ico" aria-hidden="true">↺</span><span class="lbl">Reset</span></button>
+  <span class="proj-adj" role="group" aria-label="Adjust time">
+    <button class="adj btn tool" data-sec="-60" title="Arrow Down">−1 min</button>
+    <button class="adj btn tool" data-sec="60" title="Arrow Up">+1 min</button>
+    <button class="adj btn tool" data-sec="300">+5 min</button>
+  </span>
   <button id="projMute" data-mute class="btn tool" title="Mute (M)" aria-label="Mute" aria-pressed="false">🔉</button>
   <button id="projExit" class="btn tool" title="Exit projection (Esc)">✕ Exit</button>
 </div>
